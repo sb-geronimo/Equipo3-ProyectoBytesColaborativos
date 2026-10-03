@@ -2,6 +2,7 @@ package es.bytescolab.msfuel.config;
 
 import es.bytescolab.msfuel.security.InternalKeyFilter;
 import es.bytescolab.msfuel.security.JwtAuthFilter;
+import es.bytescolab.msfuel.security.TokenAccessDeniedHandler;
 import es.bytescolab.msfuel.security.TokenAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,13 +20,16 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final InternalKeyFilter internalKeyFilter;
     private final TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint;
+    private final TokenAccessDeniedHandler tokenAccessDeniedHandler;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter,
                           InternalKeyFilter internalKeyFilter,
-                          TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint) {
+                          TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint,
+                          TokenAccessDeniedHandler tokenAccessDeniedHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.internalKeyFilter = internalKeyFilter;
         this.tokenAuthenticationEntryPoint = tokenAuthenticationEntryPoint;
+        this.tokenAccessDeniedHandler = tokenAccessDeniedHandler;
     }
 
     @Bean
@@ -36,7 +40,8 @@ public class SecurityConfig {
                 .addFilterBefore(internalKeyFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(e -> e
-                        .authenticationEntryPoint(tokenAuthenticationEntryPoint))
+                        .authenticationEntryPoint(tokenAuthenticationEntryPoint)
+                        .accessDeniedHandler(tokenAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/actuator/health",
