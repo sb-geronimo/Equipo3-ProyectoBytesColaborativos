@@ -9,9 +9,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,6 +23,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
@@ -69,6 +72,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             // token caducado → 401 TOKEN_EXPIRED desde el entry point
             request.setAttribute(TokenAuthenticationEntryPoint.TOKEN_EXPIRED_ATTRIBUTE,
                     TokenAuthenticationEntryPoint.TOKEN_EXPIRED);
+            SecurityContextHolder.clearContext();
+        } catch (UsernameNotFoundException e) {
+            // usuario inexistente → 401 UNAUTHORIZED desde el entry point
+            log.warn("Usuario no encontrado — URI: {}", request.getRequestURI());
             SecurityContextHolder.clearContext();
         } catch (JwtException | IllegalArgumentException e) {
             // token inválido → no autenticado
