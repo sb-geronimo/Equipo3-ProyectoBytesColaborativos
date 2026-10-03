@@ -1,6 +1,7 @@
 package es.bytescolab.msdashboard.config;
 
 import es.bytescolab.msdashboard.security.JwtAuthFilter;
+import es.bytescolab.msdashboard.security.TokenAccessDeniedHandler;
 import es.bytescolab.msdashboard.security.TokenAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,11 +18,14 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint;
+    private final TokenAccessDeniedHandler tokenAccessDeniedHandler;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter,
-                          TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint) {
+                          TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint,
+                          TokenAccessDeniedHandler tokenAccessDeniedHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.tokenAuthenticationEntryPoint = tokenAuthenticationEntryPoint;
+        this.tokenAccessDeniedHandler = tokenAccessDeniedHandler;
     }
 
     @Bean
@@ -31,7 +35,8 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(e -> e
-                        .authenticationEntryPoint(tokenAuthenticationEntryPoint))
+                        .authenticationEntryPoint(tokenAuthenticationEntryPoint)
+                        .accessDeniedHandler(tokenAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/actuator/health",
