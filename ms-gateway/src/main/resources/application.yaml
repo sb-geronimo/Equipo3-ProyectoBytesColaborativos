@@ -1,0 +1,102 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ms-gateway
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+  cloud:
+    gateway:
+      server:
+        webflux:
+          httpclient:
+            connect-timeout: 2000
+            response-timeout: 5s
+          routes:
+            # Rutas hacia servicios protegidos - el JWT lo valida el servicio destino
+            - id: ms-auth
+              uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/auth/**
+
+            - id: ms-vehicles
+              uri: ${VEHICLES_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/vehicles/**
+
+            - id: ms-drivers
+              uri: ${DRIVERS_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/drivers/**
+
+            - id: ms-routes
+              uri: ${ROUTES_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/api/routes/**
+
+            - id: ms-maintenance
+              uri: ${MAINTENANCE_SERVICE_URL:http://localhost:8086}
+              predicates:
+                - Path=/api/maintenance/**
+
+            - id: ms-fuel
+              uri: ${FUEL_SERVICE_URL:http://localhost:8087}
+              predicates:
+                - Path=/api/fuel/**
+
+            - id: ms-alerts
+              uri: ${ALERTS_SERVICE_URL:http://localhost:8088}
+              predicates:
+                - Path=/api/alerts/**
+
+            - id: ms-dashboard
+              uri: ${DASHBOARD_SERVICE_URL:http://localhost:8089}
+              predicates:
+                - Path=/api/dashboard/**
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    es.bytescolab.msgateway: DEBUG
+
+gateway:
+  rate-limit:
+    per-minute: ${RATE_LIMIT_PER_MINUTE:60}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+      show-components: ALWAYS
+      probes:
+        enabled: true
+      groups:
+        liveness:
+          include: livenessState,ping
+        readiness:
+          include: readinessState,diskSpace,redis,services
+
+services:
+  auth:
+    url: ${AUTH_SERVICE_URL:http://localhost:8081}/actuator/health
+  vehicles:
+    url: ${VEHICLES_SERVICE_URL:http://localhost:8082}/actuator/health
+  drivers:
+    url: ${DRIVERS_SERVICE_URL:http://localhost:8083}/actuator/health
+  routes:
+    url: ${ROUTES_SERVICE_URL:http://localhost:8085}/actuator/health
+  maintenance:
+    url: ${MAINTENANCE_SERVICE_URL:http://localhost:8086}/actuator/health
+  fuel:
+    url: ${FUEL_SERVICE_URL:http://localhost:8087}/actuator/health
+  alerts:
+    url: ${ALERTS_SERVICE_URL:http://localhost:8088}/actuator/health
+  dashboard:
+    url: ${DASHBOARD_SERVICE_URL:http://localhost:8089}/actuator/health
