@@ -27,3 +27,7 @@ jwt:
 
 internal:
   api-key: ${INTERNAL_API_KEY}
+
+demo:
+  seed: ${DEMO_SEED}
+  days: ${DEMO_DAYS}
