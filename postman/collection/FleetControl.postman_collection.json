@@ -1,0 +1,464 @@
+{
+  "info": {
+    "_postman_id": "930bd6c8-ee45-4b31-a71f-f2528ec49703",
+    "name": "FleetControl",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54937856",
+    "_collection_link": "https://go.postman.co/collection/54937856-930bd6c8-ee45-4b31-a71f-f2528ec49703?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "gateway",
+      "item": [
+        {
+          "name": "health",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8080}}/health",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "redirect-test",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"carlos@fleetcontrol.com\",\r\n  \"password\": \"FleetPass123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/auth/login",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "rate-limiting",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"carlos@fleetcontrol.com\",\r\n  \"password\": \"FleetPass123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/auth/login",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"carlos@fleetcontrol.com\",\r\n  \"password\": \"FleetPass123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/auth/login",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"carlos_ruiz\",\r\n  \"email\": \"carlos@fleetcontrol.com\",\r\n  \"password\": \"FleetPass123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8081}}/api/auth/register",
+              "host": [
+                "{{url-8081}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "validate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8080}}/api/auth/validate",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "validate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login-admin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"admin@fleetcontrol.com\",\r\n  \"password\": \"FleetAdmin2026!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{gwUrl}}/api/auth/login",
+              "host": [
+                "{{gwUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "drivers",
+      "item": []
+    },
+    {
+      "name": "fuel",
+      "item": []
+    },
+    {
+      "name": "maintenance",
+      "item": []
+    },
+    {
+      "name": "alerts",
+      "item": []
+    },
+    {
+      "name": "routes",
+      "item": []
+    },
+    {
+      "name": "dashboard",
+      "item": []
+    },
+    {
+      "name": "vehicles",
+      "item": [
+        {
+          "name": "list-vehicles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8082}}/api/vehicles?status=AVAILABLE",
+              "host": [
+                "{{url-8082}}"
+              ],
+              "path": [
+                "api",
+                "vehicles"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "AVAILABLE"
+                },
+                {
+                  "key": "type",
+                  "value": "MOTORCYCLE",
+                  "disabled": true
+                },
+                {
+                  "key": "plate",
+                  "value": "9",
+                  "disabled": true
+                },
+                {
+                  "key": "size",
+                  "value": "30",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "register-vehicle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"plate\": \"9012-PQR\",\r\n    \"make\": \"Mercedes-Benz\",\r\n    \"model\": \"Actros\",\r\n    \"year\": 2023,\r\n    \"type\": \"TRUCK\",\r\n    \"fuelType\": \"DIESEL\",\r\n    \"tankCapacityL\": 400,\r\n    \"odometerKm\": 12000\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/vehicles",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "vehicles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "find-id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{url-8080}}/api/vehicles/d8ce4f29-dd16-4a54-ac28-63de824cf2fc",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "d8ce4f29-dd16-4a54-ac28-63de824cf2fc"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"make\": \"Hyundai\",\r\n    \"model\": \"Kona\",\r\n    \"year\": 2020,\r\n    \"type\": \"CAR\",\r\n    \"fuelType\": \"DIESEL\",\r\n    \"tankCapacityL\": 3\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8082}}/api/vehicles/ddf6f932-f613-4331-ab59-9d61701d50ae",
+              "host": [
+                "{{url-8082}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "ddf6f932-f613-4331-ab59-9d61701d50ae"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update-status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\": \"IN_USE\",\r\n    \"odometerKm\": 453100\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8082}}/api/vehicles/d8ce4f29-dd16-4a54-ac28-63de824cf2fc/status",
+              "host": [
+                "{{url-8082}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "d8ce4f29-dd16-4a54-ac28-63de824cf2fc",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}

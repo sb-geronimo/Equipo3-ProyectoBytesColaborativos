@@ -62,8 +62,7 @@ public class VehicleServiceImpl implements VehicleService {
             vehicleToUpdate.setOdometerKm(request.odometerKm());
         }
         vehicleToUpdate.setStatus(request.status());
-
-
+        
         Vehicle vehicleUpdated = vehicleRepository.save(vehicleToUpdate);
         return vehicleMapper.toSummaryResponse(vehicleUpdated);
     }

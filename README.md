@@ -22,9 +22,6 @@ Permite a un gestor de flota autenticarse, gestionar vehículos y conductores, p
 repostajes y mantenimientos, recibir alertas automáticas (revisiones, licencias y consumo anormal) y consultar un
 dashboard con series temporales.
 
-Se construye en **1 sprint de 2 semanas** con metodología **Scrum**. Con un solo `docker compose up --build` se levantan
-los 9 servicios con 90 días de datos de demostración.
-
 ---
 
 ## Microservicios
@@ -86,10 +83,10 @@ ms-auth, ms-vehicles, ms-drivers ──► (ninguna)
 
 | Servicio         | Estado |
 |------------------|--------|
-| `ms-gateway`     | 🔧     |
-| `ms-auth`        | 🔧     |
-| `ms-vehicles`    | ⏳     |
-| `ms-drivers`     | ⏳     |
+| `ms-gateway`     | ✅     |
+| `ms-auth`        | ✅     |
+| `ms-vehicles`    | 🔧     |
+| `ms-drivers`     | 🔧     |
 | `ms-routes`      | ⏳     |
 | `ms-maintenance` | ⏳     |
 | `ms-fuel`        | ⏳     |
@@ -390,11 +387,11 @@ Todos los servicios devuelven los errores con la misma estructura:
 
 ## Equipo
 
-| Integrante       | GitHub                                         |
-|------------------|------------------------------------------------|
-| Beckan           | [@Beckan](https://github.com/sb-geronimo)      |
-| {{Integrante 2}} | [@{{usuario}}](https://github.com/{{usuario}}) |
-| {{Integrante 3}} | [@{{usuario}}](https://github.com/{{usuario}}) |
+| Integrante       | GitHub                                                   |
+|------------------|----------------------------------------------------------|
+| Beckan Geronimo  | [@Beckan](https://github.com/sb-geronimo)                |
+| Alberto Cruz     | [@alberto-cruz-mtz](https://github.com/alberto-cruz-mtz) |
+| {{Integrante 3}} | [@{{usuario}}](https://github.com/{{usuario}})           |
 
 <br>
 

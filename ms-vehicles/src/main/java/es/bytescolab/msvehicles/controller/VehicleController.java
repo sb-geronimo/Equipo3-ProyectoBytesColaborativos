@@ -65,8 +65,7 @@ public class VehicleController {
 
     @PatchMapping("/{vehicleId}/status")
     public ResponseEntity<VehicleSummaryResponse> updateVehicle(
-            @PathVariable UUID vehicleId,
-            @Valid @RequestBody StatusVehicleRequest request
+            @PathVariable UUID vehicleId, @Valid @RequestBody StatusVehicleRequest request
     ) {
         VehicleSummaryResponse response = vehicleService.updateStatusVehicle(vehicleId, request);
         return ResponseEntity.ok(response);
