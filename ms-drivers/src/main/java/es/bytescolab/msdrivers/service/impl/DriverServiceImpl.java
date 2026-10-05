@@ -7,11 +7,14 @@ import es.bytescolab.msdrivers.dto.response.DriverSummaryResponse;
 import es.bytescolab.msdrivers.dto.response.PageResponse;
 import es.bytescolab.msdrivers.entity.DriverEntity;
 import es.bytescolab.msdrivers.enums.DriverStatus;
+import es.bytescolab.msdrivers.exception.DriverNotFoundException;
+import es.bytescolab.msdrivers.exception.LicenseNumberAlreadyExistsException;
 import es.bytescolab.msdrivers.mapper.DriverMapper;
 import es.bytescolab.msdrivers.repository.DriverRepository;
 import es.bytescolab.msdrivers.service.DriverService;
 import es.bytescolab.msdrivers.specification.DriverSpecification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DriverServiceImpl implements DriverService {
@@ -38,20 +42,17 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public DriverDetailResponse findById(UUID driverId) {
-        DriverEntity driver = repository
-                .findById(driverId)
-                .orElseThrow(() -> new RuntimeException("Driver not found with id: " + driverId));
-
+        DriverEntity driver = this.findDriverById(driverId);
         return mapper.toDetailResponse(driver);
     }
 
     @Override
     public DriverDetailResponse create(DriverCreateRequest request) {
-        if (repository.existsByLicenseNumber(request.licenseNumber())) {
-            throw new RuntimeException("Driver with license number already exists: " + request.licenseNumber());
-        }
+        this.ensureLicenseNumberIsUnique(request.licenseNumber());
 
+        log.debug("Creating new driver with license number: {}", request.licenseNumber());
         DriverEntity driver = mapper.toEntity(request);
+        log.debug("Saving new driver to the database: {}", driver);
         driver = repository.save(driver);
 
         return mapper.toDetailResponse(driver);
@@ -59,14 +60,28 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public DriverDetailResponse update(UUID driverId, DriverUpdateRequest request) {
-        DriverEntity driver = repository
-                .findById(driverId)
-                .orElseThrow(() -> new RuntimeException("Driver not found with id: " + driverId));
+        DriverEntity driver = this.findDriverById(driverId);
+
+        if (!driver.getLicenseNumber().equals(request.licenseNumber())) {
+            this.ensureLicenseNumberIsUnique(request.licenseNumber());
+        }
 
         mapper.updateEntityFromRequest(request, driver);
 
         driver = repository.save(driver);
 
         return mapper.toDetailResponse(driver);
+    }
+
+    private DriverEntity findDriverById(UUID id) {
+        return repository
+                .findById(id)
+                .orElseThrow(DriverNotFoundException::new);
+    }
+
+    private void ensureLicenseNumberIsUnique(String licenseNumber) {
+        if (repository.existsByLicenseNumber(licenseNumber)) {
+            throw new LicenseNumberAlreadyExistsException();
+        }
     }
 }
