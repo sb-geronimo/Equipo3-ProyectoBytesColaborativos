@@ -20,7 +20,7 @@ public interface DriverMapper {
 
     DriverSummaryResponse toSummaryResponse(DriverEntity entity);
 
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "id", expression = "java(java.util.UUID.randomUUID())")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "status", constant = "ACTIVE")
