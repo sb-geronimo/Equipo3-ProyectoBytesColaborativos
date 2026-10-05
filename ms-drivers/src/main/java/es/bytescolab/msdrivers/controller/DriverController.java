@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -82,7 +83,7 @@ public class DriverController {
             @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE)
             @Min(value = 1, message = "size debe ser mayor que 0")
             @Max(value = MAX_PAGE_SIZE,
-                    message = "size no puede superar " + MAX_PAGE_SIZE)
+                    message = "size no puede ser superior a " + MAX_PAGE_SIZE)
             int size
     ) {
         log.debug("List drivers — status={}, licenseExpiringInDays={}, page={}, size={}",
