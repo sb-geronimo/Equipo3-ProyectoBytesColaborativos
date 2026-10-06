@@ -8,7 +8,6 @@ public record StatusVehicleRequest(
         @NotNull
         VehicleStatus status,
 
-        @NotNull
         @Positive
         Integer odometerKm
 ) {
