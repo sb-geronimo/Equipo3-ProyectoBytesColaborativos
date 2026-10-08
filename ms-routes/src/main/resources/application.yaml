@@ -23,7 +23,40 @@ management:
         enabled: true
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:}
 
 internal:
-  api-key: ${INTERNAL_API_KEY}
+  api-key: ${INTERNAL_API_KEY:}
+
+app:
+  ms-vehicles:
+    url: ${MS_VEHICLES_URL:http://localhost:8082}
+  ms-drivers:
+    url: ${MS_DRIVERS_URL:http://localhost:8083}
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 2000
+        readTimeout: 5000
+      ms-vehicles:
+        connectTimeout: 2000
+        readTimeout: 5000
+      ms-drivers:
+        connectTimeout: 2000
+        readTimeout: 5000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      msVehicles:
+        failureRateThreshold: 50
+        slidingWindowSize: 10
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 1
+      msDrivers:
+        failureRateThreshold: 50
+        slidingWindowSize: 10
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 1
