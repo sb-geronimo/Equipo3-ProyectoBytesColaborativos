@@ -50,7 +50,7 @@ import java.util.UUID;
 public class RouteController {
 
     private static final int MAX_PAGE_SIZE = 100;
-    private static final int DEFAULT_PAGE_SIZE = 20;
+    private static final String DEFAULT_PAGE_SIZE = "20";
 
     private final RouteService routeService;
 
@@ -130,7 +130,7 @@ public class RouteController {
             @RequestParam(value = "page", defaultValue = "0") int page,
 
             @Parameter(description = "Tamaño de página (por defecto 20, máximo 100)", example = "20")
-            @RequestParam(value = "size", defaultValue = "20") int size
+            @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE) int size
     ) {
         RouteFilterRequest filter = new RouteFilterRequest(
                 vehicle, driver, status, from, to, page, size
