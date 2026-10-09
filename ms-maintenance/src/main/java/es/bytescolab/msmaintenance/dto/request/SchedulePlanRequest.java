@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record CreatePlanRequest(
+public record SchedulePlanRequest(
         @NotNull(message = "El vehículo es obligatorio")
         UUID vehicleId,
         @NotNull(message = "El tipo de mantenimiento es obligatorio")

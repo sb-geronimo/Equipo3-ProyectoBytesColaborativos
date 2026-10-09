@@ -21,9 +21,41 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.CONFLICT, "PLAN_ALREADY_EXISTS", ex.getMessage());
     }
 
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleServiceUnavailable(ServiceUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
+                ErrorResponse.builder()
+                        .error("SERVICE_UNAVAILABLE")
+                        .message(ex.getMessage())
+                        .timestamp(Instant.now())
+                        .service("ms-vehicles")
+                        .build()
+        );
+    }
+
     @ExceptionHandler(VehicleNotFound.class)
     public ResponseEntity<ErrorResponse> handleVehicleNotFound(VehicleNotFound ex) {
         return build(HttpStatus.NOT_FOUND, "VEHICLE_NOT_FOUND", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidOrderState.class)
+    public ResponseEntity<ErrorResponse> handleInvalidOrderState(InvalidOrderState ex) {
+        return build(HttpStatus.CONFLICT, "INVALID_ORDER_STATE", ex.getMessage());
+    }
+
+    @ExceptionHandler(VehicleNotAvailable.class)
+    public ResponseEntity<ErrorResponse> handleVehicleNotAvailable(VehicleNotAvailable ex) {
+        return build(HttpStatus.CONFLICT, "VEHICLE_NOT_AVAILABLE", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidOdometerException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidOdometer(InvalidOdometerException ex) {
+        return build(HttpStatus.CONFLICT, "INVALID_ODOMETER", ex.getMessage());
+    }
+
+    @ExceptionHandler(OrderNotFound.class)
+    public ResponseEntity<ErrorResponse> handleOrderNotFound(OrderNotFound ex) {
+        return build(HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND", ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -42,6 +74,7 @@ public class GlobalExceptionHandler {
                 "INTERNAL_ERROR", "Error interno del servidor");
     }
 
+
     private ResponseEntity<ErrorResponse> build(HttpStatus status, String error, String message) {
         return build(status, error, message, null);
     }
@@ -54,6 +87,7 @@ public class GlobalExceptionHandler {
                         .message(message)
                         .details(details)
                         .timestamp(Instant.now())
+                        .service(null)
                         .build()
         );
     }

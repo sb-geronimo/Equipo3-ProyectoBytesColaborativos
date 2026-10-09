@@ -1,6 +1,11 @@
 spring:
   application:
     name: ms-maintenance
+  cloud:
+    openfeign:
+      httpclient:
+        hc5:
+          enabled: true
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
