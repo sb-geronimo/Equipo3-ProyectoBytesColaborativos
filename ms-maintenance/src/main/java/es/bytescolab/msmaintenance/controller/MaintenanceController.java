@@ -1,7 +1,7 @@
 package es.bytescolab.msmaintenance.controller;
 
-import es.bytescolab.msmaintenance.dto.request.SchedulePlanRequest;
 import es.bytescolab.msmaintenance.dto.request.CompleteOrderRequest;
+import es.bytescolab.msmaintenance.dto.request.SchedulePlanRequest;
 import es.bytescolab.msmaintenance.dto.response.*;
 import es.bytescolab.msmaintenance.enums.MaintenanceOrderStatus;
 import es.bytescolab.msmaintenance.enums.MaintenanceType;
@@ -66,7 +66,7 @@ public class MaintenanceController {
     }
 
     @PostMapping("/orders/{orderId}/complete")
-    public ResponseEntity<?> completeOrder(
+    public ResponseEntity<CompletedOrderResponse> completeOrder(
             @PathVariable UUID orderId,
             @Valid @RequestBody CompleteOrderRequest request
     ) {

@@ -283,7 +283,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"vehicleId\": \"a9fd3702-ade7-48c6-97a4-7c1bcfdb0c27\",\r\n    \"type\": \"OIL_CHANGE\",\r\n    \"intervalKm\": 15000,\r\n    \"intervalDays\": null,\r\n    \"lastDoneAt\": null,\r\n    \"lastDoneKm\": null\r\n}",
+              "raw": "{\r\n    \"vehicleId\": \"4fe0b7eb-3390-413a-9bd1-799d25a39e84\",\r\n    \"type\": \"OIL_CHANGE\",\r\n    \"intervalKm\": 15000,\r\n    \"intervalDays\": 200,\r\n    \"lastDoneAt\": null,\r\n    \"lastDoneKm\": null\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -299,6 +299,127 @@
                 "api",
                 "maintenance",
                 "plans"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "list-orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8086}}/api/maintenance/orders?vehicle=a04b0b23-fb99-4238-b906-6f322795b1e3",
+              "host": [
+                "{{url-8086}}"
+              ],
+              "path": [
+                "api",
+                "maintenance",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "vehicle",
+                  "value": "a04b0b23-fb99-4238-b906-6f322795b1e3"
+                },
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "OIL_CHANGE",
+                  "disabled": true
+                },
+                {
+                  "key": "dueBefore",
+                  "value": "2026-11-10",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "start-order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{url-8086}}/api/maintenance/orders/16c9a02d-5a7c-4809-85df-e514fc4499ce/start",
+              "host": [
+                "{{url-8086}}"
+              ],
+              "path": [
+                "api",
+                "maintenance",
+                "orders",
+                "16c9a02d-5a7c-4809-85df-e514fc4499ce",
+                "start"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "complete-orders",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"cost\": 185.50,\r\n    \"odometerKm\": 400210,\r\n    \"workshop\": \"Taller Central Madrid\",\r\n    \"notes\": \"Cambio de aceite y filtros\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8086}}/api/maintenance/orders/16c9a02d-5a7c-4809-85df-e514fc4499ce/complete",
+              "host": [
+                "{{url-8086}}"
+              ],
+              "path": [
+                "api",
+                "maintenance",
+                "orders",
+                "16c9a02d-5a7c-4809-85df-e514fc4499ce",
+                "complete"
               ]
             }
           },
@@ -337,7 +458,7 @@
               }
             ],
             "url": {
-              "raw": "{{url-8082}}/api/vehicles?status=AVAILABLE",
+              "raw": "{{url-8082}}/api/vehicles",
               "host": [
                 "{{url-8082}}"
               ],
@@ -348,7 +469,8 @@
               "query": [
                 {
                   "key": "status",
-                  "value": "AVAILABLE"
+                  "value": "AVAILABLE",
+                  "disabled": true
                 },
                 {
                   "key": "type",
@@ -486,12 +608,12 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{token}}",
+                "disabled": true
               },
               {
                 "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
+                "value": "{{internal-key}}"
               }
             ],
             "body": {
