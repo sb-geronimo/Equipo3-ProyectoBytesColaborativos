@@ -1,5 +1,6 @@
 package es.bytescolab.msroutes.client;
 
+import es.bytescolab.msroutes.config.InternalFeignConfig;
 import es.bytescolab.msroutes.dto.request.VehicleStatusUpdateRequest;
 import es.bytescolab.msroutes.dto.response.VehicleDetailResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.UUID;
 
-@FeignClient(name = "vehicle-service", url = "${clients.vehicle-service}")
+@FeignClient(name = "vehicle-service", url = "${clients.vehicle-service}", configuration = InternalFeignConfig.class)
 public interface VehicleClient {
 
     @GetMapping("/api/vehicles/{vehicleId}")
