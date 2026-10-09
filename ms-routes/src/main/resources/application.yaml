@@ -6,6 +6,9 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:admin}
     password: ${SPRING_DATASOURCE_PASSWORD:admin123}
     driver-class-name: org.postgresql.Driver
+  cloud:
+    openfeign:
+      ok
 
 server:
   port: 8085
@@ -27,3 +30,7 @@ jwt:
 
 internal:
   api-key: ${INTERNAL_API_KEY}
+
+clients:
+  vehicle-service: ${VEHICLE_SERVICE_URL:http://ms-vehicles:8082}
+  driver-service: ${DRIVER_SERVICE_URL:http://ms-drivers:8083}
