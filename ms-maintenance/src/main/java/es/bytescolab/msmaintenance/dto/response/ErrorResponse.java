@@ -12,7 +12,9 @@ public record ErrorResponse(
         String message,
         @JsonInclude(JsonInclude.Include.NON_NULL)
         List<Detail> details,
-        Instant timestamp
+        Instant timestamp,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String service
 ) {
     @Builder
     public record Detail(

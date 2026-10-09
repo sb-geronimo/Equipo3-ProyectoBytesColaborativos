@@ -5,7 +5,7 @@ import es.bytescolab.msmaintenance.enums.MaintenanceType;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record CreatePlanResponse(
+public record PlanDetailsResponse(
         UUID id,
         UUID vehicleId,
         MaintenanceType type,

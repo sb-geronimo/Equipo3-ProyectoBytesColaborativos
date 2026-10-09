@@ -88,7 +88,7 @@ ms-auth, ms-vehicles, ms-drivers ──► (ninguna)
 | `ms-vehicles`    | 🔧     |
 | `ms-drivers`     | 🔧     |
 | `ms-routes`      | ⏳     |
-| `ms-maintenance` | ⏳     |
+| `ms-maintenance` | 🔧     |
 | `ms-fuel`        | ⏳     |
 | `ms-alerts`      | ⏳     |
 | `ms-dashboard`   | ⏳     |
@@ -197,8 +197,9 @@ docker compose down -v     # parar y eliminar volúmenes (borra datos y regenera
 
 ## Endpoints disponibles
 
-El gateway escucha en `http://localhost:8080`. Las rutas protegidas (`🔒`) requieren la cabecera
-`Authorization: Bearer <token>`. Los endpoints "interno" también aceptan `X-Internal-Key`.
+El gateway escucha en `http://localhost:8080`.  
+Las rutas protegidas (`🔒`) requieren la cabecera `Authorization: Bearer <token>`.  
+Los endpoints "interno" también aceptan `X-Internal-Key`.
 
 ### Roles
 
@@ -255,14 +256,16 @@ El gateway escucha en `http://localhost:8080`. Las rutas protegidas (`🔒`) req
 
 ### Mantenimiento `🔒` — `ms-maintenance`
 
-| Método | Ruta                                         | Descripción                                          |
-|--------|----------------------------------------------|------------------------------------------------------|
-| POST   | `/api/maintenance/plans`                     | Crea un plan de mantenimiento                        |
-| GET    | `/api/maintenance/plans`                     | Lista planes (`vehicle`, `type`, `active`)           |
-| GET    | `/api/maintenance/orders`                    | Lista paginada de órdenes (`dueBefore`, `status`...) |
-| POST   | `/api/maintenance/orders/{orderId}/start`    | Inicia la orden, el vehículo pasa a `IN_MAINTENANCE` |
-| POST   | `/api/maintenance/orders/{orderId}/complete` | Completa la orden y recalcula el plan                |
-| GET    | `/api/maintenance/stats`                     | Serie temporal de órdenes y costes                   |
+| Método | Ruta                                         | Descripción                                                                                             |
+|--------|----------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| POST   | `/api/maintenance/plans`                     | Crea un plan de mantenimiento                                                                           |
+| GET    | `/api/maintenance/plans`                     | Lista planes (`vehicle`, `type`, `active`)                                                              |
+| GET    | `/api/maintenance/orders`                    | Lista paginada, orden `scheduledFor` ASC (`vehicle`, `status`, `type`, `dueBefore`, `page`, `size`)     |
+| POST   | `/api/maintenance/orders/{orderId}/start`    | Inicia la orden `PENDING→IN_PROGRESS`, vehículo a `IN_MAINTENANCE`                                      |
+| POST   | `/api/maintenance/orders/{orderId}/complete` | Completa `IN_PROGRESS→COMPLETED`, vehículo a `AVAILABLE` con odómetro, recalcula `nextDueAt/nextDueKm`. |
+| GET    | `/api/maintenance/stats`                     | Serie temporal de órdenes y costes (pendiente US-17)                                                    |
+
+> Tarea diaria `06:00 UTC`: crea `PENDING` si faltan ≤7 días o ≤500 km para el vencimiento, sin duplicar abiertas.
 
 ### Combustible `🔒` — `ms-fuel`
 
