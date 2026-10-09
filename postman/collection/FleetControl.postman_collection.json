@@ -115,9 +115,9 @@
               }
             },
             "url": {
-              "raw": "{{url-8080}}/api/auth/login",
+              "raw": "{{url-8081}}/api/auth/login",
               "host": [
-                "{{url-8080}}"
+                "{{url-8081}}"
               ],
               "path": [
                 "api",
@@ -220,7 +220,91 @@
     },
     {
       "name": "maintenance",
-      "item": []
+      "item": [
+        {
+          "name": "list-plan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8086}}/api/maintenance/plans?active=true",
+              "host": [
+                "{{url-8086}}"
+              ],
+              "path": [
+                "api",
+                "maintenance",
+                "plans"
+              ],
+              "query": [
+                {
+                  "key": "vehicle",
+                  "value": "176ccebf-a473-43ab-8862-e874871fa242",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "OIL_CHANGE",
+                  "disabled": true
+                },
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create-plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"vehicleId\": \"a9fd3702-ade7-48c6-97a4-7c1bcfdb0c27\",\r\n    \"type\": \"OIL_CHANGE\",\r\n    \"intervalKm\": 15000,\r\n    \"intervalDays\": null,\r\n    \"lastDoneAt\": null,\r\n    \"lastDoneKm\": null\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8086}}/api/maintenance/plans",
+              "host": [
+                "{{url-8086}}"
+              ],
+              "path": [
+                "api",
+                "maintenance",
+                "plans"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     },
     {
       "name": "alerts",
