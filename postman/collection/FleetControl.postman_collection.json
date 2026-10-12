@@ -216,7 +216,183 @@
     },
     {
       "name": "fuel",
-      "item": []
+      "item": [
+        {
+          "name": "create-refuel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"vehicleId\": \"6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01\",\r\n  \"refueledAt\": \"2026-10-06T12:15:00Z\",\r\n  \"liters\": 58.4,\r\n  \"pricePerLiter\": 1.62,\r\n  \"odometerKm\": 45572,\r\n  \"fullTank\": true,\r\n  \"station\": \"Repsol A-3 km 112\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8087}}/api/fuel/refuels",
+              "host": [
+                "{{url-8087}}"
+              ],
+              "path": [
+                "api",
+                "fuel",
+                "refuels"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "list-refuels",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8087}}/api/fuel/refuels?vehicle=6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01&from=2026-09-01&to=2026-09-30&page=0&size=20",
+              "host": [
+                "{{url-8087}}"
+              ],
+              "path": [
+                "api",
+                "fuel",
+                "refuels"
+              ],
+              "query": [
+                {
+                  "key": "vehicle",
+                  "value": "6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "consumption",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8087}}/api/fuel/consumption?from=2026-09-01&to=2026-09-30",
+              "host": [
+                "{{url-8087}}"
+              ],
+              "path": [
+                "api",
+                "fuel",
+                "consumption"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8087}}/api/fuel/stats?from=2026-09-01&to=2026-09-30&granularity=WEEK&vehicle=6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01",
+              "host": [
+                "{{url-8087}}"
+              ],
+              "path": [
+                "api",
+                "fuel",
+                "stats"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                },
+                {
+                  "key": "granularity",
+                  "value": "WEEK"
+                },
+                {
+                  "key": "vehicle",
+                  "value": "6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     },
     {
       "name": "maintenance",
