@@ -27,3 +27,6 @@ jwt:
 
 internal:
   api-key: ${INTERNAL_API_KEY}
+
+clients:
+  vehicle-service: ${VEHICLES_SERVICE_URL:http://localhost:8082}
