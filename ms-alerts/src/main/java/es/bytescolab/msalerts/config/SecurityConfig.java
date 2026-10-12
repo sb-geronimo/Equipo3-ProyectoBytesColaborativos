@@ -48,7 +48,7 @@ public class SecurityConfig {
                                 "/actuator/health",
                                 "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
                         .permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/alerts/rules/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/alerts/rules/{type}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/alerts/evaluate").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(AbstractHttpConfigurer::disable)
