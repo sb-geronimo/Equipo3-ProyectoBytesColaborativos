@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public final class FuelRecordSpecifications {
@@ -32,6 +33,8 @@ public final class FuelRecordSpecifications {
     }
 
     public static Specification<FuelRecordEntity> previousRefuelBefore(UUID vehicleId, Instant before) {
+        Objects.requireNonNull(vehicleId, "vehicleId must not be null");
+        Objects.requireNonNull(before, "before must not be null");
         return (root, query, cb) -> cb.and(
                 cb.equal(root.get("vehicleId"), vehicleId),
                 cb.lessThan(root.get("refueledAt"), before)
@@ -39,6 +42,8 @@ public final class FuelRecordSpecifications {
     }
 
     public static Specification<FuelRecordEntity> lastFullTankAtOrBefore(UUID vehicleId, Instant atOrBefore) {
+        Objects.requireNonNull(vehicleId, "vehicleId must not be null");
+        Objects.requireNonNull(atOrBefore, "atOrBefore must not be null");
         return (root, query, cb) -> cb.and(
                 cb.equal(root.get("vehicleId"), vehicleId),
                 cb.equal(root.get("fullTank"), Boolean.TRUE),
@@ -48,6 +53,9 @@ public final class FuelRecordSpecifications {
 
     public static Specification<FuelRecordEntity> refuelsStrictlyBetween(
             UUID vehicleId, Instant fromExclusive, Instant toInclusive) {
+        Objects.requireNonNull(vehicleId, "vehicleId must not be null");
+        Objects.requireNonNull(fromExclusive, "fromExclusive must not be null");
+        Objects.requireNonNull(toInclusive, "toInclusive must not be null");
         return (root, query, cb) -> cb.and(
                 cb.equal(root.get("vehicleId"), vehicleId),
                 cb.greaterThan(root.get("refueledAt"), fromExclusive),

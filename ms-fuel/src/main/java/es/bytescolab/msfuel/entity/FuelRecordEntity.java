@@ -9,7 +9,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -78,13 +77,9 @@ public class FuelRecordEntity implements Persistable<UUID> {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @Transient
-    @Builder.Default
-    private boolean isNew = true;
-
     @Override
     public boolean isNew() {
-        return this.isNew;
+        return this.id == null;
     }
 
 }
