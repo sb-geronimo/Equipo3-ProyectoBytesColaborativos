@@ -1,5 +1,9 @@
 package es.bytescolab.msalerts.mapper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.bytescolab.msalerts.dto.request.UpdateAlertRuleRequest;
 import es.bytescolab.msalerts.dto.response.AlertRuleResponse;
 import es.bytescolab.msalerts.entity.AlertRuleEntity;
@@ -7,10 +11,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
 
 import java.util.Map;
 
