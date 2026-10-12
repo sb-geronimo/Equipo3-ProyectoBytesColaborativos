@@ -27,3 +27,16 @@ jwt:
 
 internal:
   api-key: ${INTERNAL_API_KEY}
+
+clients:
+  vehicle-service: ${VEHICLES_SERVICE_URL:http://localhost:8082}
+  driver-service: ${DRIVERS_SERVICE_URL:http://localhost:8083}
+  maintenance-service: ${MAINTENANCE_SERVICE_URL:http://localhost:8086}
+  fuel-service: ${FUEL_SERVICE_URL:http://localhost:8087}
+
+alerts:
+  evaluation:
+    interval-ms: ${ALERTS_EVALUATION_INTERVAL_MS:900000}
+    initial-delay-ms: 60000
+  rules:
+    seed: true
