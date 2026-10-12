@@ -73,7 +73,6 @@ public class FuelRecordServiceImpl implements FuelRecordService {
                         request.refueledAt(),
                         request.odometerKm(),
                         request.fullTank()));
-        entity.setNew(false);
 
         FuelRecordEntity saved = fuelRecordRepository.save(entity);
         log.info("Repostaje registrado: id={}, vehicleId={}, liters={}, totalCost={}",

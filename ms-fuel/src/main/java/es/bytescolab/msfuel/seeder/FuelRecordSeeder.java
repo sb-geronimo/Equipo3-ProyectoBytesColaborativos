@@ -196,7 +196,6 @@ public class FuelRecordSeeder {
                 .station(faker.options().option("Repsol", "Cepsa", "BP", "Shell", "Galp"))
                 .consumptionL100km(storedConsumption)
                 .createdAt(refueledAt)
-                .isNew(true)
                 .build();
     }
 
