@@ -3,6 +3,8 @@ package es.bytescolab.msalerts.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +37,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            request.setAttribute(TokenAuthenticationEntryPoint.TOKEN_ERROR_ATTRIBUTE,
+                    TokenAuthenticationEntryPoint.TOKEN_MISSING);
             filterChain.doFilter(request, response);
             return;
         }
@@ -50,13 +54,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
 
         } catch (ExpiredJwtException e) {
-            // token caducado → 401 TOKEN_EXPIRED desde el entry point
-            request.setAttribute(TokenAuthenticationEntryPoint.TOKEN_EXPIRED_ATTRIBUTE,
+            request.setAttribute(TokenAuthenticationEntryPoint.TOKEN_ERROR_ATTRIBUTE,
                     TokenAuthenticationEntryPoint.TOKEN_EXPIRED);
             SecurityContextHolder.clearContext();
+        } catch (SignatureException e) {
+            request.setAttribute(TokenAuthenticationEntryPoint.TOKEN_ERROR_ATTRIBUTE,
+                    TokenAuthenticationEntryPoint.TOKEN_BAD_SIGNATURE);
+            SecurityContextHolder.clearContext();
+        } catch (MalformedJwtException e) {
+            request.setAttribute(TokenAuthenticationEntryPoint.TOKEN_ERROR_ATTRIBUTE,
+                    TokenAuthenticationEntryPoint.TOKEN_MALFORMED);
+            SecurityContextHolder.clearContext();
         } catch (JwtException | IllegalArgumentException e) {
-            // token inválido → 401 UNAUTHORIZED desde el entry point
-            log.warn("Token inválido — URI: {}", request.getRequestURI());
+            request.setAttribute(TokenAuthenticationEntryPoint.TOKEN_ERROR_ATTRIBUTE,
+                    TokenAuthenticationEntryPoint.TOKEN_INVALID);
             SecurityContextHolder.clearContext();
         }
 
