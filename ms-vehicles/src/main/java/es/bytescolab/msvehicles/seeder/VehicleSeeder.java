@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -46,6 +47,7 @@ public class VehicleSeeder {
         log.info("Iniciando seeder demo de ms-vehicles (seed={})", seed);
 
         Faker faker = new Faker(new Locale("es", "ES"), new Random(seed));
+        Instant baseInstant = Instant.now();
         List<Vehicle> vehicles = new ArrayList<>(VEHICLE_COUNT);
 
         for (int i = 0; i < VEHICLE_COUNT; i++) {
@@ -54,6 +56,7 @@ public class VehicleSeeder {
             FuelType fuelType = faker.options().option(FuelType.values());
             String make = faker.vehicle().make();
             String model = faker.vehicle().model(make);
+            Instant createdAt = baseInstant.minusSeconds((long) (VEHICLE_COUNT - i));
 
             vehicles.add(Vehicle.builder()
                     .id(deterministicUuid("vehicle-" + i))
@@ -66,6 +69,8 @@ public class VehicleSeeder {
                     .tankCapacityL(generateTankCapacity(faker, type))
                     .odometerKm(faker.number().numberBetween(5_000, 250_001))
                     .status(status)
+                    .createdAt(createdAt)
+                    .updatedAt(createdAt)
                     .build());
         }
 
