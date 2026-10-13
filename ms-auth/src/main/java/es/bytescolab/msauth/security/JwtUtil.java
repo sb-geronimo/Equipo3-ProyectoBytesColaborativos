@@ -33,7 +33,7 @@ public class JwtUtil {
                 .claim("role", role.name())
                 .issuedAt(now)
                 .expiration(expiry)
-                .signWith(getSigningKey(), Jwts.SIG.HS256)
+                .signWith(getSigningKey())
                 .compact();
     }
 
