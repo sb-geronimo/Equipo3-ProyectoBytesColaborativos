@@ -1,6 +1,8 @@
 package es.bytescolab.msalerts.service;
 
+import es.bytescolab.msalerts.dto.request.AlertStatsRequest;
 import es.bytescolab.msalerts.dto.response.AlertResponse;
+import es.bytescolab.msalerts.dto.response.AlertStatsResponse;
 import es.bytescolab.msalerts.dto.response.PageResponse;
 import es.bytescolab.msalerts.enums.AlertSeverity;
 import es.bytescolab.msalerts.enums.AlertStatus;
@@ -20,4 +22,6 @@ public interface AlertQueryService {
     );
 
     AlertResponse acknowledge(UUID alertId, String comment, UUID currentUserId);
+
+    AlertStatsResponse getStats(AlertStatsRequest request);
 }

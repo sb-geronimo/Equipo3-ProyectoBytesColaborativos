@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -34,6 +35,18 @@ public class AlertValidationExceptionHandler {
                 ErrorResponse.builder()
                         .error("VALIDATION_ERROR")
                         .message("Parámetros inválidos")
+                        .timestamp(Instant.now())
+                        .build()
+        );
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingParam(MissingServletRequestParameterException ex) {
+        log.warn("Parámetro obligatorio ausente: nombre={}, tipo={}", ex.getParameterName(), ex.getParameterType());
+        return ResponseEntity.badRequest().body(
+                ErrorResponse.builder()
+                        .error("VALIDATION_ERROR")
+                        .message("El parámetro '" + ex.getParameterName() + "' es obligatorio")
                         .timestamp(Instant.now())
                         .build()
         );
