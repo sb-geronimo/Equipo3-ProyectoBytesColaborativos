@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.List;
@@ -65,6 +67,31 @@ public class GlobalExceptionHandler {
                 .toList();
         return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
                 "La petición contiene campos no válidos", details);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingParam(MissingServletRequestParameterException ex) {
+        String reason = "El parámetro '" + ex.getParameterName() + "' es obligatorio (tipo "
+                + ex.getParameterType() + ")";
+        List<ErrorResponse.Detail> details = List.of(
+                new ErrorResponse.Detail(ex.getParameterName(), reason));
+        log.warn("Parámetro obligatorio ausente: {}", ex.getParameterName());
+        return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
+                "La petición contiene parámetros obligatorios ausentes", details);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String expectedType = ex.getRequiredType() != null
+                ? ex.getRequiredType().getSimpleName()
+                : "valor válido";
+        String reason = "El parámetro '" + ex.getName() + "' no tiene un formato válido ("
+                + expectedType + " esperado)";
+        List<ErrorResponse.Detail> details = List.of(
+                new ErrorResponse.Detail(ex.getName(), reason));
+        log.warn("Parámetro con formato inválido: {}", ex.getName());
+        return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
+                "La petición contiene parámetros con formato inválido", details);
     }
 
     @ExceptionHandler(Exception.class)

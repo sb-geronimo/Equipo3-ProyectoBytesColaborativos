@@ -1,6 +1,7 @@
 package es.bytescolab.msmaintenance.controller;
 
 import es.bytescolab.msmaintenance.dto.request.CompleteOrderRequest;
+import es.bytescolab.msmaintenance.dto.request.MaintenanceStatsRequest;
 import es.bytescolab.msmaintenance.dto.request.SchedulePlanRequest;
 import es.bytescolab.msmaintenance.dto.response.*;
 import es.bytescolab.msmaintenance.enums.MaintenanceOrderStatus;
@@ -8,6 +9,7 @@ import es.bytescolab.msmaintenance.enums.MaintenanceType;
 import es.bytescolab.msmaintenance.service.MaintenanceService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -71,6 +73,25 @@ public class MaintenanceController {
             @Valid @RequestBody CompleteOrderRequest request
     ) {
         CompletedOrderResponse response = maintenanceService.completeOrder(orderId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<MaintenanceStatsResponse> getStats(
+            @RequestParam("from") @NotNull
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+
+            @RequestParam("to") @NotNull
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+
+            @RequestParam(value = "granularity", required = false, defaultValue = "DAY")
+            String granularity,
+
+            @RequestParam(value = "vehicle", required = false) UUID vehicle
+    ) {
+        MaintenanceStatsRequest request =
+                new MaintenanceStatsRequest(from, to, granularity, vehicle);
+        MaintenanceStatsResponse response = maintenanceService.getStats(request);
         return ResponseEntity.ok(response);
     }
 }
