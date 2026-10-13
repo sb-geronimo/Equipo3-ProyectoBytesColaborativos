@@ -1,9 +1,11 @@
 package es.bytescolab.msalerts.controller;
 
 import es.bytescolab.msalerts.dto.request.AcknowledgeAlertRequest;
+import es.bytescolab.msalerts.dto.request.AlertStatsRequest;
 import es.bytescolab.msalerts.dto.request.UpdateAlertRuleRequest;
 import es.bytescolab.msalerts.dto.response.AlertResponse;
 import es.bytescolab.msalerts.dto.response.AlertRuleResponse;
+import es.bytescolab.msalerts.dto.response.AlertStatsResponse;
 import es.bytescolab.msalerts.dto.response.EvaluationSummaryResponse;
 import es.bytescolab.msalerts.dto.response.ErrorResponse;
 import es.bytescolab.msalerts.dto.response.PageResponse;
@@ -22,8 +24,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -36,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -177,6 +182,40 @@ public class AlertController {
     public ResponseEntity<EvaluationSummaryResponse> evaluate() {
         log.info("Petición POST /api/alerts/evaluate — evaluación manual solicitada");
         EvaluationSummaryResponse response = alertEvaluationService.runEvaluation();
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Serie temporal de alertas creadas",
+            description = "Lo consume ms-dashboard. Agrupa por fecha de creación con granularidad "
+                    + "DAY, WEEK o MONTH y devuelve además un snapshot de alertas actualmente OPEN "
+                    + "desglosado por severidad."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Serie temporal generada",
+                    content = @Content(schema = @Schema(implementation = AlertStatsResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Parámetros inválidos (VALIDATION_ERROR)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/stats")
+    public ResponseEntity<AlertStatsResponse> getStats(
+            @Parameter(description = "Fecha inicial del rango (inclusiva)", example = "2026-09-07")
+            @RequestParam("from") @NotNull
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+
+            @Parameter(description = "Fecha final del rango (inclusiva)", example = "2026-09-27")
+            @RequestParam("to") @NotNull
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+
+            @Parameter(description = "Granularidad de la serie temporal",
+                    example = "DAY", schema = @Schema(allowableValues = {"DAY", "WEEK", "MONTH"}))
+            @RequestParam(value = "granularity", required = false, defaultValue = "DAY")
+            String granularity
+    ) {
+        log.info("Petición GET /api/alerts/stats recibida — from={}, to={}, granularity={}",
+                from, to, granularity);
+        AlertStatsRequest request = new AlertStatsRequest(from, to, granularity);
+        AlertStatsResponse response = alertQueryService.getStats(request);
         return ResponseEntity.ok(response);
     }
 

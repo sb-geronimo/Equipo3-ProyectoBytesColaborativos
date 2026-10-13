@@ -7,6 +7,7 @@ import es.bytescolab.msalerts.enums.AlertType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +24,25 @@ public final class AlertSpecifications {
                 return cb.conjunction();
             }
             return root.get("status").in(statuses);
+        };
+    }
+
+    public static Specification<AlertEntity> statusEquals(AlertStatus status) {
+        return (root, query, cb) -> status == null ? cb.conjunction() : cb.equal(root.get("status"), status);
+    }
+
+    public static Specification<AlertEntity> createdInRange(Instant from, Instant to) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>(2);
+            if (from != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
+            }
+            if (to != null) {
+                predicates.add(cb.lessThan(root.get("createdAt"), to));
+            }
+            return predicates.isEmpty()
+                    ? cb.conjunction()
+                    : cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 
