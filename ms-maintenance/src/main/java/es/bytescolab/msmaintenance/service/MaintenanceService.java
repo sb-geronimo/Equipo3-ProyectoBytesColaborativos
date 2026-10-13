@@ -1,5 +1,6 @@
 package es.bytescolab.msmaintenance.service;
 
+import es.bytescolab.msmaintenance.dto.request.MaintenanceStatsRequest;
 import es.bytescolab.msmaintenance.dto.request.SchedulePlanRequest;
 import es.bytescolab.msmaintenance.dto.request.CompleteOrderRequest;
 import es.bytescolab.msmaintenance.dto.response.*;
@@ -26,4 +27,6 @@ public interface MaintenanceService {
     StartedOrderResponse startOrder(UUID orderId);
 
     CompletedOrderResponse completeOrder(UUID orderId, CompleteOrderRequest request);
+
+    MaintenanceStatsResponse getStats(MaintenanceStatsRequest request);
 }
