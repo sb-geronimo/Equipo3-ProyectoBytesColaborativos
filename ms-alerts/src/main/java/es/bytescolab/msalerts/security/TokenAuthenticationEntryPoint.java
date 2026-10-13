@@ -19,17 +19,44 @@ import java.time.Instant;
 @Slf4j
 public class TokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    public static final String TOKEN_EXPIRED_ATTRIBUTE = "jwt.error";
+    public static final String TOKEN_ERROR_ATTRIBUTE = "jwt.error";
     public static final String TOKEN_EXPIRED = "TOKEN_EXPIRED";
+    public static final String TOKEN_BAD_SIGNATURE = "TOKEN_BAD_SIGNATURE";
+    public static final String TOKEN_MALFORMED = "TOKEN_MALFORMED";
+    public static final String TOKEN_MISSING = "TOKEN_MISSING";
+    public static final String TOKEN_INVALID = "TOKEN_INVALID";
 
     private final ObjectMapper objectMapper;
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
-        boolean expired = TOKEN_EXPIRED.equals(request.getAttribute(TOKEN_EXPIRED_ATTRIBUTE));
-        String error = expired ? TOKEN_EXPIRED : "UNAUTHORIZED";
-        String message = expired ? "El token ha expirado" : "Falta el token de autenticación o no es válido";
+        String reason = asString(request.getAttribute(TOKEN_ERROR_ATTRIBUTE));
+        String error;
+        String message;
+
+        switch (reason) {
+            case TOKEN_EXPIRED -> {
+                error = TOKEN_EXPIRED;
+                message = "El token ha expirado";
+            }
+            case TOKEN_BAD_SIGNATURE -> {
+                error = TOKEN_BAD_SIGNATURE;
+                message = "La firma del token no es válida";
+            }
+            case TOKEN_MALFORMED -> {
+                error = TOKEN_MALFORMED;
+                message = "El token está malformado";
+            }
+            case TOKEN_MISSING -> {
+                error = TOKEN_MISSING;
+                message = "Falta el token de autenticación";
+            }
+            default -> {
+                error = "UNAUTHORIZED";
+                message = "Token de autenticación no válido";
+            }
+        }
 
         log.warn("No autorizado ({}): {}", error, request.getRequestURI());
 
@@ -42,5 +69,9 @@ public class TokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(objectMapper.writeValueAsString(body));
+    }
+
+    private static String asString(Object value) {
+        return value == null ? "" : value.toString();
     }
 }
