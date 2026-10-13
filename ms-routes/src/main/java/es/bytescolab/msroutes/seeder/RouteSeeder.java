@@ -189,11 +189,11 @@ public class RouteSeeder {
     }
 
     private UUID vehicleId(int index) {
-        return deterministicUuid("vehicle-" + (index + 1));
+        return deterministicUuid("vehicle-" + index);
     }
 
     private UUID driverId(int index) {
-        return deterministicUuid("driver-" + (index + 1));
+        return deterministicUuid("driver-" + index);
     }
 
     private UUID deterministicUuid(String key) {
