@@ -1,6 +1,15 @@
 spring:
   application:
     name: ms-fuel
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 2000
+            readTimeout: 5000
+      circuitbreaker:
+        enabled: true
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/fuel_db}
     username: ${SPRING_DATASOURCE_USERNAME:admin}
@@ -30,3 +39,13 @@ internal:
 
 clients:
   vehicle-service: ${VEHICLES_SERVICE_URL:http://localhost:8082}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      vehicle-service:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s

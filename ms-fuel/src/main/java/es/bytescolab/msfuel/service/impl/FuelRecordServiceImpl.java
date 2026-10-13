@@ -22,6 +22,7 @@ import es.bytescolab.msfuel.service.FuelRecordService;
 import es.bytescolab.msfuel.service.helper.FuelConsumptionCalculator;
 import es.bytescolab.msfuel.service.helper.FuelTimeSeriesBuilder;
 import feign.FeignException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -136,7 +137,7 @@ public class FuelRecordServiceImpl implements FuelRecordService {
             return vehicleClient.getVehicle(vehicleId);
         } catch (FeignException.NotFound ex) {
             throw new VehicleNotFoundException(vehicleId);
-        } catch (FeignException ex) {
+        } catch (FeignException | CallNotPermittedException ex) {
             throw new VehiclesServiceUnavailableException(
                     "ms-vehicles no está disponible");
         }

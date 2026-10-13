@@ -8,7 +8,28 @@ spring:
     driver-class-name: org.postgresql.Driver
   cloud:
     openfeign:
-      ok
+      client:
+        config:
+          default:
+            connectTimeout: 2000
+            readTimeout: 5000
+      circuitbreaker:
+        enabled: true
+
+x-resilience-defaults: &cb-defaults
+  slidingWindowType: COUNT_BASED
+  slidingWindowSize: 10
+  minimumNumberOfCalls: 10
+  failureRateThreshold: 50
+  waitDurationInOpenState: 30s
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      vehicle-service:
+        <<: *cb-defaults
+      driver-service:
+        <<: *cb-defaults
 
 server:
   port: 8085
