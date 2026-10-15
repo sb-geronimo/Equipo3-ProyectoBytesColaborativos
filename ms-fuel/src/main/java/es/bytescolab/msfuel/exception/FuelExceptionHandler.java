@@ -36,7 +36,14 @@ public class FuelExceptionHandler {
     public ResponseEntity<ErrorResponse> handleVehiclesServiceUnavailable(
             VehiclesServiceUnavailableException ex) {
         log.error("ms-vehicles no disponible: {}", ex.getMessage());
-        return buildResponse(HttpStatus.SERVICE_UNAVAILABLE, ex);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
+                ErrorResponse.builder()
+                        .error(ex.getErrorCode())
+                        .message(ex.getMessage())
+                        .service("ms-vehicles")
+                        .timestamp(Instant.now())
+                        .build()
+        );
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, FuelBusinessException ex) {

@@ -6,6 +6,13 @@ spring:
       httpclient:
         hc5:
           enabled: true
+      client:
+        config:
+          default:
+            connectTimeout: 2000
+            readTimeout: 5000
+      circuitbreaker:
+        enabled: true
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -40,3 +47,17 @@ demo:
 vehicles:
   service:
     url: http://localhost:8082
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      ms-vehicles:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+  timelimiter:
+    instances:
+      ms-vehicles:
+        timeoutDuration: 15s
