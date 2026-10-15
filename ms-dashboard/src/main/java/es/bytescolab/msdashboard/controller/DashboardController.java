@@ -3,9 +3,12 @@ package es.bytescolab.msdashboard.controller;
 import es.bytescolab.msdashboard.dto.request.MetricsTimeseriesRequest;
 import es.bytescolab.msdashboard.dto.response.DashboardResponse;
 import es.bytescolab.msdashboard.dto.response.ErrorResponse;
+import es.bytescolab.msdashboard.dto.response.RankingResponse;
 import es.bytescolab.msdashboard.dto.response.TimeseriesResponse;
 import es.bytescolab.msdashboard.enums.DashboardMetric;
+import es.bytescolab.msdashboard.enums.RankingMetric;
 import es.bytescolab.msdashboard.service.DashboardAggregator;
+import es.bytescolab.msdashboard.service.RankingService;
 import es.bytescolab.msdashboard.service.TimeseriesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,6 +44,7 @@ public class DashboardController {
 
     private final DashboardAggregator dashboardAggregator;
     private final TimeseriesService timeseriesService;
+    private final RankingService rankingService;
 
     @Operation(
             summary = "Resumen ejecutivo de la flota",
@@ -100,6 +104,40 @@ public class DashboardController {
                 metrics, from, to, granularity);
         MetricsTimeseriesRequest request = new MetricsTimeseriesRequest(metrics, from, to, granularity);
         TimeseriesResponse respuesta = timeseriesService.getTimeseries(request);
+        return ResponseEntity.ok(respuesta);
+    }
+
+    @Operation(
+            summary = "Ranking de vehículos por coste de combustible o consumo",
+            description = "Llama a ms-fuel /api/fuel/consumption, ordena los vehículos de mayor a menor "
+                    + "según la métrica (FUEL_COST o CONSUMPTION) y aplica un filtro opcional por tipo. "
+                    + "Devuelve los primeros `limit` (1..20)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ranking generado",
+                    content = @Content(schema = @Schema(implementation = RankingResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Parámetros inválidos (VALIDATION_ERROR)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/vehicles/ranking")
+    public ResponseEntity<RankingResponse> getRanking(
+            @Parameter(description = "Métrica del ranking", example = "FUEL_COST",
+                    schema = @Schema(allowableValues = {"FUEL_COST", "CONSUMPTION"}))
+            @RequestParam("metric") RankingMetric metric,
+
+            @Parameter(description = "Días del periodo a cubrir (1..365)", example = "30")
+            @RequestParam(value = "days", defaultValue = "30") @Min(1) @Max(365) int days,
+
+            @Parameter(description = "Número máximo de entradas (1..20)", example = "5")
+            @RequestParam(value = "limit", defaultValue = "5") @Min(1) @Max(20) int limit,
+
+            @Parameter(description = "Filtra el ranking por tipo de vehículo (opcional)",
+                    example = "VAN")
+            @RequestParam(value = "type", required = false) String type
+    ) {
+        log.info("Petición GET /api/dashboard/vehicles/ranking — metric={}, days={}, limit={}, type={}",
+                metric, days, limit, type);
+        RankingResponse respuesta = rankingService.getRanking(metric, days, limit, type);
         return ResponseEntity.ok(respuesta);
     }
 }
