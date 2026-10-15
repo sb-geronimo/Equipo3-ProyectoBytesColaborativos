@@ -41,7 +41,9 @@ public class AlertPersistenceHelper {
         List<AlertEntity> toCreate = new ArrayList<>();
         Set<String> candidateDedupSet = new HashSet<>();
         for (AlertCandidate candidate : candidates) {
-            candidateDedupSet.add(candidate.dedupKey());
+            if (!candidateDedupSet.add(candidate.dedupKey())) {
+                continue;
+            }
             if (!activeByDedup.containsKey(candidate.dedupKey())) {
                 toCreate.add(buildEntity(candidate));
             }
