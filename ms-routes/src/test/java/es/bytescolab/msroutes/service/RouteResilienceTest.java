@@ -14,6 +14,7 @@ import es.bytescolab.msroutes.repository.RouteRepository;
 import es.bytescolab.msroutes.service.impl.RouteServiceImpl;
 import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -73,6 +74,22 @@ class RouteResilienceTest {
         UUID vehicleId = UUID.randomUUID();
         when(vehicleClient.getVehicle(vehicleId))
                 .thenThrow(mock(CallNotPermittedException.class));
+
+        assertThatThrownBy(() -> service.create(routeCreateRequest(vehicleId), UUID.randomUUID()))
+                .isInstanceOf(RouteServiceUnavailableException.class)
+                .satisfies(thrownFailure -> {
+                    RouteServiceUnavailableException unavailableFailure =
+                            (RouteServiceUnavailableException) thrownFailure;
+                    assertThat(unavailableFailure.getErrorCode()).isEqualTo("SERVICE_UNAVAILABLE");
+                    assertThat(unavailableFailure.getService()).isEqualTo("ms-vehicles");
+                });
+    }
+
+    @Test
+    void envolturaSinFallback_planificarDevuelveServiceUnavailableConServicio() {
+        UUID vehicleId = UUID.randomUUID();
+        when(vehicleClient.getVehicle(vehicleId))
+                .thenThrow(mock(NoFallbackAvailableException.class));
 
         assertThatThrownBy(() -> service.create(routeCreateRequest(vehicleId), UUID.randomUUID()))
                 .isInstanceOf(RouteServiceUnavailableException.class)

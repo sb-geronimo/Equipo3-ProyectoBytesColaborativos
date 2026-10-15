@@ -31,6 +31,7 @@ import es.bytescolab.msroutes.repository.RouteRepository;
 import es.bytescolab.msroutes.service.RouteService;
 import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -125,7 +126,7 @@ public class RouteServiceImpl implements RouteService {
             log.info("Actualizando estado del vehículo {} a IN_USE", vehicle.id());
             vehicleClient.updateStatus(vehicle.id(),
                     new VehicleStatusUpdateRequest(VehicleStatus.IN_USE, null));
-        } catch (FeignException | CallNotPermittedException ex) {
+        } catch (FeignException | CallNotPermittedException | NoFallbackAvailableException ex) {
             log.info("Fallo al cambiar el estado del vehículo a IN_USE: {}", ex.getMessage());
             throw new RouteServiceUnavailableException(MS_VEHICLES,
                     "ms-vehicles no pudo cambiar el estado del vehículo a IN_USE");
@@ -167,7 +168,7 @@ public class RouteServiceImpl implements RouteService {
         try {
             vehicleClient.updateStatus(route.getVehicleId(),
                     new VehicleStatusUpdateRequest(VehicleStatus.AVAILABLE, endOdometer));
-        } catch (FeignException | CallNotPermittedException ex) {
+        } catch (FeignException | CallNotPermittedException | NoFallbackAvailableException ex) {
             throw new RouteServiceUnavailableException(MS_VEHICLES,
                     "ms-vehicles no pudo devolver el vehículo a AVAILABLE");
         }
@@ -244,7 +245,7 @@ public class RouteServiceImpl implements RouteService {
             return vehicleClient.getVehicle(vehicleId);
         } catch (FeignException.NotFound ex) {
             throw new VehicleNotFoundException(vehicleId);
-        } catch (FeignException | CallNotPermittedException ex) {
+        } catch (FeignException | CallNotPermittedException | NoFallbackAvailableException ex) {
             throw new RouteServiceUnavailableException(MS_VEHICLES,
                     "ms-vehicles no está disponible");
         }
@@ -255,7 +256,7 @@ public class RouteServiceImpl implements RouteService {
             return driverClient.getDriver(driverId);
         } catch (FeignException.NotFound ex) {
             throw new DriverNotFoundException(driverId);
-        } catch (FeignException | CallNotPermittedException ex) {
+        } catch (FeignException | CallNotPermittedException | NoFallbackAvailableException ex) {
             throw new RouteServiceUnavailableException(MS_DRIVERS,
                     "ms-drivers no está disponible");
         }

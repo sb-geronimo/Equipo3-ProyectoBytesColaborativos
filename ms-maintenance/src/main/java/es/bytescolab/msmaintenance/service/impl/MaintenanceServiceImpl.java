@@ -22,6 +22,7 @@ import es.bytescolab.msmaintenance.specification.MaintenancePlanSpecification;
 import feign.FeignException;
 import feign.RetryableException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -65,7 +66,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             vehicle = vehicleClient.getVehicle(request.vehicleId());
         } catch (FeignException.NotFound e) {
             throw new VehicleNotFound("No existe un vehículo con el ID proporcionado");
-        } catch (FeignException.ServiceUnavailable | RetryableException | CallNotPermittedException e) {
+        } catch (FeignException.ServiceUnavailable | RetryableException | CallNotPermittedException | NoFallbackAvailableException e) {
             throw new ServiceUnavailableException("ms-vehicles no responde", e);
         }
 
@@ -157,7 +158,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             vehicle = vehicleClient.getVehicle(orderToUpdate.getVehicleId());
         } catch (FeignException.NotFound e) {
             throw new VehicleNotFound("No existe un vehículo con el ID proporcionado");
-        } catch (FeignException.ServiceUnavailable | RetryableException | CallNotPermittedException e) {
+        } catch (FeignException.ServiceUnavailable | RetryableException | CallNotPermittedException | NoFallbackAvailableException e) {
             throw new ServiceUnavailableException("ms-vehicles no responde", e);
         }
 
@@ -172,7 +173,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             vehicleClient.updateVehicle(
                     orderToUpdate.getVehicleId(),
                     new StatusChangeRequest(VehicleStatus.AVAILABLE, finalOdometer));
-        } catch (FeignException.ServiceUnavailable | RetryableException | CallNotPermittedException e) {
+        } catch (FeignException.ServiceUnavailable | RetryableException | CallNotPermittedException | NoFallbackAvailableException e) {
             throw new ServiceUnavailableException("ms-vehicles no responde", e);
         }
 
@@ -218,7 +219,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             vehicle = vehicleClient.getVehicle(orderToUpdate.getVehicleId());
         } catch (FeignException.NotFound e) {
             throw new VehicleNotFound("No existe un vehículo con el ID proporcionado");
-        } catch (FeignException.ServiceUnavailable | RetryableException | CallNotPermittedException e) {
+        } catch (FeignException.ServiceUnavailable | RetryableException | CallNotPermittedException | NoFallbackAvailableException e) {
             log.warn("Error al consultar", e.getMessage());
             throw new ServiceUnavailableException("ms-vehicles no responde", e);
         }
@@ -229,7 +230,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             vehicleClient.updateVehicle(
                     orderToUpdate.getVehicleId(),
                     new StatusChangeRequest(VehicleStatus.IN_MAINTENANCE, null));
-        } catch (RetryableException | CallNotPermittedException e) {
+        } catch (RetryableException | CallNotPermittedException | NoFallbackAvailableException e) {
             log.warn("No se pudo conectar con ms-vehicles: {}", e.getMessage());
             throw new ServiceUnavailableException("ms-vehicles no responde", e);
         } catch (FeignException.ServiceUnavailable e) {

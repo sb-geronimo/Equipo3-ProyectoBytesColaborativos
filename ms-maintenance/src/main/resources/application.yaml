@@ -57,3 +57,7 @@ resilience4j:
         minimumNumberOfCalls: 10
         failureRateThreshold: 50
         waitDurationInOpenState: 30s
+  timelimiter:
+    instances:
+      ms-vehicles:
+        timeoutDuration: 15s

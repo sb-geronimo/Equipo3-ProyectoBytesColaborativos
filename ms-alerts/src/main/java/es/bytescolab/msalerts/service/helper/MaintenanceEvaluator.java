@@ -10,6 +10,7 @@ import es.bytescolab.msalerts.enums.AlertSeverity;
 import es.bytescolab.msalerts.enums.AlertType;
 import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -103,7 +104,7 @@ public class MaintenanceEvaluator implements AlertEvaluator {
             return vehicle.map(VehicleDetailResponse::plate).orElse("desconocido");
         } catch (FeignException.NotFound ex) {
             return "desconocido";
-        } catch (FeignException | CallNotPermittedException ex) {
+        } catch (FeignException | CallNotPermittedException | NoFallbackAvailableException ex) {
             log.warn("No se pudo obtener la placa del vehículo {}: {}", vehicleId, ex.getMessage());
             return "desconocido";
         }
