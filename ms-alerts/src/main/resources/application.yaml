@@ -49,6 +49,9 @@ alerts:
     initial-delay-ms: 60000
   rules:
     seed: true
+  webhook:
+    url: ${WEBHOOK_URL:}
+    timeout-ms: ${WEBHOOK_TIMEOUT_MS:5000}
 
 x-resilience-defaults: &cb-defaults
   slidingWindowType: COUNT_BASED

@@ -29,7 +29,7 @@ public class AlertPersistenceHelper {
 
     public PersistenceResult apply(List<AlertCandidate> candidates) {
         if (candidates.isEmpty()) {
-            return new PersistenceResult(0, 0, List.of());
+            return new PersistenceResult(0, 0, List.of(), List.of());
         }
 
         Set<String> dedupKeys = candidates.stream()
@@ -66,7 +66,7 @@ public class AlertPersistenceHelper {
             alertRepository.saveAll(toResolve);
         }
         log.debug("Persistencia aplicada: {} creadas, {} resueltas", toCreate.size(), toResolve.size());
-        return new PersistenceResult(toCreate.size(), toResolve.size(), dedupKeys);
+        return new PersistenceResult(toCreate.size(), toResolve.size(), dedupKeys, List.copyOf(toCreate));
     }
 
     private AlertEntity buildEntity(AlertCandidate candidate) {
@@ -83,6 +83,7 @@ public class AlertPersistenceHelper {
                 .build();
     }
 
-    public record PersistenceResult(int created, int resolved, Collection<String> processedDedupKeys) {
+    public record PersistenceResult(int created, int resolved, Collection<String> processedDedupKeys,
+                                      List<AlertEntity> createdAlerts) {
     }
 }

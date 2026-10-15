@@ -57,6 +57,8 @@ class AlertPersistenceHelperTest {
         ArgumentCaptor<List<AlertEntity>> saved = ArgumentCaptor.forClass(List.class);
         verify(alertRepository).saveAll(saved.capture());
         assertThat(result.created()).isEqualTo(1);
+        assertThat(result.createdAlerts()).hasSize(1);
+        assertThat(result.createdAlerts().get(0).getDedupKey()).isEqualTo("MAINTENANCE_OVERDUE:order-1");
         assertThat(saved.getValue()).hasSize(1);
         assertThat(saved.getValue().get(0).getDedupKey()).isEqualTo("MAINTENANCE_OVERDUE:order-1");
         assertThat(saved.getValue().get(0).getStatus()).isEqualTo(AlertStatus.OPEN);
@@ -96,6 +98,7 @@ class AlertPersistenceHelperTest {
                 persistenceHelper.apply(List.of(candidate));
 
         assertThat(result.created()).isZero();
+        assertThat(result.createdAlerts()).isEmpty();
         verify(alertRepository, never()).saveAll(anyList());
     }
 

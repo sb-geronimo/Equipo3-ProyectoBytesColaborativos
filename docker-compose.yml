@@ -147,6 +147,7 @@ services:
       MAINTENANCE_SERVICE_URL: http://ms-maintenance:8086
       FUEL_SERVICE_URL: http://ms-fuel:8087
       ALERTS_EVALUATION_INTERVAL_MS: 900000
+      WEBHOOK_URL: ${WEBHOOK_URL:-}
 
   ms-dashboard:
     build: ./ms-dashboard

@@ -145,6 +145,7 @@ cp .env.example .env
 | `RATE_LIMIT_PER_MINUTE`         | Peticiones por minuto y por IP en el gateway                                                                         | `60`                                   |
 | `REDIS_HOST` / `REDIS_PORT`     | Host y puerto de Redis para el rate limiting (definidos en el `docker-compose.yml`)                                  | `redis` / `6379`                       |
 | `ALERTS_EVALUATION_INTERVAL_MS` | Intervalo del evaluador de alertas                                                                                   | `900000` (15 min)                      |
+| `WEBHOOK_URL`                   | URL del webhook al que ms-alerts envía cada alerta CRITICAL nueva (vacía = deshabilitado)                             | — (vacía)                              |
 | `*_SERVICE_URL`                 | URL de cada servicio (`AUTH_`, `VEHICLES_`, `DRIVERS_`, `ROUTES_`, `MAINTENANCE_`, `FUEL_`, `ALERTS_`, `DASHBOARD_`) | `http://ms-vehicles:8082`              |
 | `SPRING_DATASOURCE_URL`         | URL JDBC de cada servicio (definida en el `docker-compose.yml`)                                                      | `jdbc:postgresql://postgres:5432/<db>` |
 
