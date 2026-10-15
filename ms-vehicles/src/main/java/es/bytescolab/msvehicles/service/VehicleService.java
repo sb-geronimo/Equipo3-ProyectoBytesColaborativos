@@ -3,6 +3,7 @@ package es.bytescolab.msvehicles.service;
 import es.bytescolab.msvehicles.dto.request.CreateVehicleRequest;
 import es.bytescolab.msvehicles.dto.request.StatusVehicleRequest;
 import es.bytescolab.msvehicles.dto.request.UpdateVehicleRequest;
+import es.bytescolab.msvehicles.dto.response.FleetSummaryResponse;
 import es.bytescolab.msvehicles.dto.response.PageResponse;
 import es.bytescolab.msvehicles.dto.response.VehicleDetailsResponse;
 import es.bytescolab.msvehicles.dto.response.VehicleSummaryResponse;
@@ -27,4 +28,6 @@ public interface VehicleService {
     VehicleSummaryResponse updateVehicle(UUID vehicleId, UpdateVehicleRequest request);
 
     VehicleSummaryResponse updateStatusVehicle(UUID vehicleId, StatusVehicleRequest request);
+
+    FleetSummaryResponse getFleetSummary();
 }

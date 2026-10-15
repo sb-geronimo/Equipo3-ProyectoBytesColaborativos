@@ -3,12 +3,20 @@ package es.bytescolab.msvehicles.controller;
 import es.bytescolab.msvehicles.dto.request.CreateVehicleRequest;
 import es.bytescolab.msvehicles.dto.request.StatusVehicleRequest;
 import es.bytescolab.msvehicles.dto.request.UpdateVehicleRequest;
+import es.bytescolab.msvehicles.dto.response.FleetSummaryResponse;
 import es.bytescolab.msvehicles.dto.response.PageResponse;
 import es.bytescolab.msvehicles.dto.response.VehicleDetailsResponse;
 import es.bytescolab.msvehicles.dto.response.VehicleSummaryResponse;
 import es.bytescolab.msvehicles.enums.VehicleStatus;
 import es.bytescolab.msvehicles.enums.VehicleType;
 import es.bytescolab.msvehicles.service.VehicleService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Tag(name = "Vehicles", description = "Gestión del inventario y resumen agregado de la flota")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/vehicles")
 @RequiredArgsConstructor
@@ -46,6 +56,21 @@ public class VehicleController {
         PageResponse<VehicleSummaryResponse> response = vehicleService.findVehicles(pageable, status, type, plate);
         return ResponseEntity
                 .ok(response);
+    }
+
+    @Operation(
+            summary = "Resumen agregado de la flota",
+            description = "Devuelve el total de vehículos y el desglose por estado y por tipo en una sola "
+                    + "respuesta agregada. Lo consume ms-dashboard."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Resumen de la flota",
+                    content = @Content(schema = @Schema(implementation = FleetSummaryResponse.class)))
+    })
+    @GetMapping("/summary")
+    public ResponseEntity<FleetSummaryResponse> getFleetSummary() {
+        FleetSummaryResponse response = vehicleService.getFleetSummary();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{vehicleId}")
