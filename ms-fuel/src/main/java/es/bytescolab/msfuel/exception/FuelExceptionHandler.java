@@ -46,6 +46,12 @@ public class FuelExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidExportRangeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidExportRange(InvalidExportRangeException ex) {
+        log.warn("Rango de exportación inválido: {}", ex.getMessage());
+        return buildResponse(HttpStatus.BAD_REQUEST, ex);
+    }
+
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, FuelBusinessException ex) {
         return ResponseEntity.status(status).body(
                 ErrorResponse.builder()

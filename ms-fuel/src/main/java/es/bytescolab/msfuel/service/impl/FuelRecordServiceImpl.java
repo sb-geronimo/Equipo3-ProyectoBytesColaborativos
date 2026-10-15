@@ -12,6 +12,7 @@ import es.bytescolab.msfuel.dto.response.RefuelResponse;
 import es.bytescolab.msfuel.dto.response.VehicleConsumption;
 import es.bytescolab.msfuel.dto.response.VehicleDetailResponse;
 import es.bytescolab.msfuel.entity.FuelRecordEntity;
+import es.bytescolab.msfuel.exception.InvalidExportRangeException;
 import es.bytescolab.msfuel.exception.InvalidOdometerException;
 import es.bytescolab.msfuel.exception.LitersExceedTankCapacityException;
 import es.bytescolab.msfuel.exception.VehicleNotFoundException;
@@ -54,6 +55,7 @@ public class FuelRecordServiceImpl implements FuelRecordService {
 
     private static final String MS_VEHICLES = "ms-vehicles";
     private static final String DEFAULT_GRANULARITY = "DAY";
+    private static final int MAX_EXPORT_ROWS = 10000;
 
     private final FuelRecordRepository fuelRecordRepository;
     private final VehicleClient vehicleClient;
@@ -92,6 +94,20 @@ public class FuelRecordServiceImpl implements FuelRecordService {
         return fuelRecordRepository
                 .findByFilters(vehicle, fromInstant, toInstant, pageable)
                 .map(fuelRecordMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RefuelResponse> findForExport(UUID vehicle, LocalDate from, LocalDate to) {
+        ensureExportRangeValid(from, to);
+        Instant fromInstant = toInstantStartOfDay(from);
+        Instant toInstant = toInstantStartOfDayAfter(to);
+        Sort exportSort = Sort.by(Sort.Order.desc("refueledAt"), Sort.Order.asc("id"));
+        return fuelRecordRepository.findRecordsInRange(vehicle, fromInstant, toInstant, exportSort)
+                .stream()
+                .limit(MAX_EXPORT_ROWS)
+                .map(fuelRecordMapper::toResponse)
+                .toList();
     }
 
     @Override
@@ -251,8 +267,13 @@ public class FuelRecordServiceImpl implements FuelRecordService {
                 .divide(BigDecimal.valueOf(distanceKm), 2, RoundingMode.HALF_UP);
     }
 
-    private static Instant toInstantStartOfDay(LocalDate date) {
-        return date == null ? null : date.atStartOfDay(ZoneOffset.UTC).toInstant();
+    private void ensureExportRangeValid(LocalDate from, LocalDate to) {
+        if (from != null && to != null && from.isAfter(to)) {
+            throw new InvalidExportRangeException(from, to);
+        }
+    }
+
+    private static Instant toInstantStartOfDay(LocalDate date) {        return date == null ? null : date.atStartOfDay(ZoneOffset.UTC).toInstant();
     }
 
     private static Instant toInstantStartOfDayAfter(LocalDate date) {
