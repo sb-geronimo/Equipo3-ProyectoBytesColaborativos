@@ -613,7 +613,137 @@
     },
     {
       "name": "dashboard",
-      "item": []
+      "item": [
+        {
+          "name": "get-summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{url-8089}}/api/dashboard?days=30",
+              "host": [
+                "{{url-8089}}"
+              ],
+              "path": [
+                "api",
+                "dashboard"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-timeseries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{url-8089}}/api/dashboard/timeseries?metrics=DISTANCE_KM,FUEL_COST&from=2026-09-01&to=2026-10-14&granularity=DAY",
+              "host": [
+                "{{url-8089}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "timeseries"
+              ],
+              "query": [
+                {
+                  "key": "metrics",
+                  "value": "DISTANCE_KM,FUEL_COST"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-14"
+                },
+                {
+                  "key": "granularity",
+                  "value": "DAY"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-vehicles-ranking",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{url-8089}}/api/dashboard/vehicles/ranking?metric=FUEL_COST&days=30&limit=5&type=VAN",
+              "host": [
+                "{{url-8089}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "vehicles",
+                "ranking"
+              ],
+              "query": [
+                {
+                  "key": "metric",
+                  "value": "FUEL_COST"
+                },
+                {
+                  "key": "days",
+                  "value": "30"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                },
+                {
+                  "key": "type",
+                  "value": "VAN"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     },
     {
       "name": "vehicles",
@@ -705,6 +835,35 @@
               "path": [
                 "api",
                 "vehicles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Internal-Key",
+                "value": "{{internal-key}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{url-8082}}/api/vehicles/summary",
+              "host": [
+                "{{url-8082}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "summary"
               ]
             }
           },
