@@ -2,7 +2,7 @@ spring:
   application:
     name: ms-routes
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/routes_db}
+    url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -62,5 +62,5 @@ internal:
   api-key: ${INTERNAL_API_KEY}
 
 clients:
-  vehicle-service: ${VEHICLE_SERVICE_URL:http://ms-vehicles:8082}
-  driver-service: ${DRIVER_SERVICE_URL:http://ms-drivers:8083}
+  vehicle-service: ${VEHICLES_SERVICE_URL}
+  driver-service: ${DRIVERS_SERVICE_URL}

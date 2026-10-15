@@ -11,7 +11,7 @@ spring:
       circuitbreaker:
         enabled: true
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/alerts_db}
+    url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -38,20 +38,20 @@ internal:
   api-key: ${INTERNAL_API_KEY}
 
 clients:
-  vehicle-service: ${VEHICLES_SERVICE_URL:http://localhost:8082}
-  driver-service: ${DRIVERS_SERVICE_URL:http://localhost:8083}
-  maintenance-service: ${MAINTENANCE_SERVICE_URL:http://localhost:8086}
-  fuel-service: ${FUEL_SERVICE_URL:http://localhost:8087}
+  vehicle-service: ${VEHICLES_SERVICE_URL}
+  driver-service: ${DRIVERS_SERVICE_URL}
+  maintenance-service: ${MAINTENANCE_SERVICE_URL}
+  fuel-service: ${FUEL_SERVICE_URL}
 
 alerts:
   evaluation:
-    interval-ms: ${ALERTS_EVALUATION_INTERVAL_MS:900000}
+    interval-ms: ${ALERTS_EVALUATION_INTERVAL_MS}
     initial-delay-ms: 60000
   rules:
     seed: true
   webhook:
-    url: ${WEBHOOK_URL:}
-    timeout-ms: ${WEBHOOK_TIMEOUT_MS:5000}
+    url: ${WEBHOOK_URL}
+    timeout-ms: ${WEBHOOK_TIMEOUT_MS}
 
 x-resilience-defaults: &cb-defaults
   slidingWindowType: COUNT_BASED
