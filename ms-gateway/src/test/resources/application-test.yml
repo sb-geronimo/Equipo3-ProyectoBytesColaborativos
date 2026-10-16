@@ -1,0 +1,67 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: false
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: ms-auth
+              uri: http://localhost:18091
+              predicates:
+                - Path=/api/auth/**
+            - id: ms-vehicles
+              uri: http://localhost:18092
+              predicates:
+                - Path=/api/vehicles/**
+            - id: ms-drivers
+              uri: http://localhost:18093
+              predicates:
+                - Path=/api/drivers/**
+            - id: ms-routes
+              uri: http://localhost:18094
+              predicates:
+                - Path=/api/routes/**
+            - id: ms-maintenance
+              uri: http://localhost:18095
+              predicates:
+                - Path=/api/maintenance/**
+            - id: ms-fuel
+              uri: http://localhost:18096
+              predicates:
+                - Path=/api/fuel/**
+            - id: ms-alerts
+              uri: http://localhost:18097
+              predicates:
+                - Path=/api/alerts/**
+            - id: ms-dashboard
+              uri: http://localhost:18098
+              predicates:
+                - Path=/api/dashboard/**
+
+gateway:
+  rate-limit:
+    per-minute: 60
+
+services:
+  auth:
+    url: http://localhost:18091/actuator/health
+  vehicles:
+    url: http://localhost:18092/actuator/health
+  drivers:
+    url: http://localhost:18093/actuator/health
+  routes:
+    url: http://localhost:18094/actuator/health
+  maintenance:
+    url: http://localhost:18095/actuator/health
+  fuel:
+    url: http://localhost:18096/actuator/health
+  alerts:
+    url: http://localhost:18097/actuator/health
+  dashboard:
+    url: http://localhost:18098/actuator/health

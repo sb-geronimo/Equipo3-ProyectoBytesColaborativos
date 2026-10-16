@@ -1,0 +1,15 @@
+spring:
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: false
+
+jwt:
+  secret: test-secret-test-secret-test-secret-test-secret-1234567890
+
+internal:
+  api-key: test-internal-api-key
+
+clients:
+  vehicle-service: http://localhost:18081
+  driver-service: http://localhost:18082
