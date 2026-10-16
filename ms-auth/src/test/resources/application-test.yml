@@ -1,0 +1,15 @@
+spring:
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: false
+
+jwt:
+  secret: test-secret-test-secret-test-secret-test-secret-1234567890
+  expiration: 3600
+
+internal:
+  api-key: test-internal-api-key
+
+demo:
+  admin-password: test-admin-password
