@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "930bd6c8-ee45-4b31-a71f-f2528ec49703",
-    "name": "FleetControl",
+    "_postman_id": "7c1f2a30-9b4d-4a55-b1a0-7d2e8c6f1a02",
+    "name": "FleetControl E2E",
+    "description": "Happy-path end-to-end flow against a freshly booted FleetControl stack with no seeders. Captures the JWT, then creates a manager, driver, vehicle, route (planned/in-progress/completed), refuel and maintenance plan. Maintenance orders are not created on a fresh boot (only the daily scheduler at 06:00 UTC creates them), so the orders/list -> start -> complete chain skips itself when the list is empty. Each step writes minimal assertions so `newman run --bail` exits 0 on success.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "54937856",
-    "_collection_link": "https://go.postman.co/collection/54937856-930bd6c8-ee45-4b31-a71f-f2528ec49703?source=collection_link"
+    "_exporter_id": "54937856"
   },
   "item": [
     {
@@ -12,88 +12,28 @@
       "item": [
         {
           "name": "health",
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
           "request": {
             "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "",
-              "options": {
-                "raw": {
-                  "language": "text"
-                }
-              }
-            },
             "url": {
               "raw": "{{url-8080}}/health",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "health"
-              ]
+              "host": ["{{url-8080}}"],
+              "path": ["health"]
             }
           },
-          "response": []
-        },
-        {
-          "name": "redirect-test",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"email\": \"carlos@fleetcontrol.com\",\r\n  \"password\": \"FleetPass123\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('gateway health 2xx', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ]
               }
-            },
-            "url": {
-              "raw": "{{url-8080}}/api/auth/login",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
             }
-          },
-          "response": []
-        },
-        {
-          "name": "rate-limiting",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"email\": \"carlos@fleetcontrol.com\",\r\n  \"password\": \"FleetPass123\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url-8080}}/api/auth/login",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            }
-          },
-          "response": []
+          ]
         }
       ]
     },
@@ -101,112 +41,140 @@
       "name": "auth",
       "item": [
         {
-          "name": "login",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"email\": \"carlos@fleetcontrol.com\",\r\n  \"password\": \"FleetPass123\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url-8081}}/api/auth/login",
-              "host": [
-                "{{url-8081}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "register",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"username\": \"carlos_ruiz\",\r\n  \"email\": \"carlos@fleetcontrol.com\",\r\n  \"password\": \"FleetPass123\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var ts = Date.now();",
+                  "pm.environment.set('registerUsername', 'manager_' + ts);",
+                  "pm.environment.set('registerEmail', 'manager_' + ts + '@fleetcontrol.test');",
+                  "pm.environment.set('registerPassword', 'FleetPass123');"
+                ]
               }
             },
-            "url": {
-              "raw": "{{url-8081}}/api/auth/register",
-              "host": [
-                "{{url-8081}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "register"
-              ]
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('register status 201 or 409 if race', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 409]);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    var body = pm.response.json();",
+                  "    if (body && body.id) { pm.environment.set('userId', body.id); }",
+                  "}"
+                ]
+              }
             }
-          },
-          "response": []
-        },
-        {
-          "name": "validate",
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              {"key": "Content-Type", "value": "application/json"}
             ],
-            "url": {
-              "raw": "{{url-8080}}/api/auth/validate",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "validate"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "login-admin",
-          "request": {
-            "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"admin@fleetcontrol.com\",\r\n  \"password\": \"FleetAdmin2026!\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+              "raw": "{\n  \"username\": \"{{registerUsername}}\",\n  \"email\": \"{{registerEmail}}\",\n  \"password\": \"{{registerPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/auth/register",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "login",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('registerEmail')) {",
+                  "    pm.environment.set('registerEmail', 'manager_' + Date.now() + '@fleetcontrol.test');",
+                  "    pm.environment.set('registerPassword', 'FleetPass123');",
+                  "}"
+                ]
               }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('login status 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);",
+                  "});",
+                  "var body = {};",
+                  "try { body = pm.response.json(); } catch (e) {}",
+                  "if (pm.response.code === 200 && body && body.token) {",
+                  "    pm.environment.set('token', body.token);",
+                  "    if (body.userId) { pm.environment.set('userId', body.userId); }",
+                  "}",
+                  "pm.test('captured token is a JWT', function () {",
+                  "    pm.expect(pm.environment.get('token') || '').to.match(/^eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\./);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{registerEmail}}\",\n  \"password\": \"{{registerPassword}}\"\n}"
             },
             "url": {
               "raw": "{{url-8080}}/api/auth/login",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
+              "host": ["{{url-8080}}"],
+              "path": ["api", "auth", "login"]
             }
-          },
-          "response": []
+          }
+        },
+        {
+          "name": "validate",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('validate status 200 or 401', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url-8080}}/api/auth/validate",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "auth", "validate"]
+            }
+          }
         }
       ]
     },
@@ -214,1147 +182,99 @@
       "name": "drivers",
       "item": [
         {
-          "name": "list-drivers",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
+          "name": "create",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var ts = Date.now();",
+                  "pm.environment.set('driverFullName', 'Driver ' + ts);",
+                  "pm.environment.set('driverEmail', 'driver_' + ts + '@fleetcontrol.test');",
+                  "pm.environment.set('driverPhone', '+34 600 ' + (100000 + (ts % 900000)));",
+                  "pm.environment.set('driverLicenseNumber', 'LIC-' + ts);",
+                  "var year = new Date().getFullYear() + 3;",
+                  "pm.environment.set('driverLicenseExpiresAt', year + '-12-31');",
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
               }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/drivers?status=ACTIVE&licenseExpiringInDays=365",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "drivers"
-              ],
-              "query": [
-                {
-                  "key": "status",
-                  "value": "ACTIVE"
-                },
-                {
-                  "key": "page",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "size",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "licenseExpiringInDays",
-                  "value": "365"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "get-driver",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('create driver 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201]);",
+                  "});",
+                  "var body = pm.response.json();",
+                  "if (body && body.id) {",
+                  "    pm.environment.set('driverId', body.id);",
+                  "}",
+                  "pm.test('captured driverId', function () {",
+                  "    pm.expect(pm.environment.get('driverId')).to.be.a('string').and.not.empty;",
+                  "});"
+                ]
               }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/drivers/3b2d8f10-7c4a-4e55-b1a0-5d9e2c7f1a01",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "drivers",
-                "3b2d8f10-7c4a-4e55-b1a0-5d9e2c7f1a01"
-              ]
             }
-          },
-          "response": []
-        },
-        {
-          "name": "create-driver",
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              {"key": "Content-Type", "value": "application/json"}
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"fullName\": \"Sara Ibáñez\",\r\n  \"email\": \"sara.ibanez@fleetcontrol.com\",\r\n  \"phone\": \"+34 622 456 789\",\r\n  \"licenseNumber\": \"B-5120377\",\r\n  \"licenseCategory\": \"B\",\r\n  \"licenseExpiresAt\": \"2029-06-30\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"fullName\": \"{{driverFullName}}\",\n  \"email\": \"{{driverEmail}}\",\n  \"phone\": \"{{driverPhone}}\",\n  \"licenseNumber\": \"{{driverLicenseNumber}}\",\n  \"licenseCategory\": \"B\",\n  \"licenseExpiresAt\": \"{{driverLicenseExpiresAt}}\"\n}"
             },
             "url": {
               "raw": "{{url-8080}}/api/drivers",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "drivers"
-              ]
+              "host": ["{{url-8080}}"],
+              "path": ["api", "drivers"]
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "update-driver",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"fullName\": \"Sara Ibáñez\",\r\n  \"email\": \"sara.ibanez@fleetcontrol.com\",\r\n  \"phone\": \"+34 622 456 789\",\r\n  \"licenseNumber\": \"B-5120377\",\r\n  \"licenseCategory\": \"B\",\r\n  \"licenseExpiresAt\": \"2029-06-30\",\r\n  \"status\": \"ACTIVE\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+          "name": "list",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
               }
             },
-            "url": {
-              "raw": "{{url-8080}}/api/drivers/3b2d8f10-7c4a-4e55-b1a0-5d9e2c7f1a01",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "drivers",
-                "3b2d8f10-7c4a-4e55-b1a0-5d9e2c7f1a01"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "fuel",
-      "item": [
-        {
-          "name": "create-refuel",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('list drivers 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);",
+                  "});"
+                ]
               }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"vehicleId\": \"6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01\",\r\n  \"refueledAt\": \"2026-10-06T12:15:00Z\",\r\n  \"liters\": 58.4,\r\n  \"pricePerLiter\": 1.62,\r\n  \"odometerKm\": 45572,\r\n  \"fullTank\": true,\r\n  \"station\": \"Repsol A-3 km 112\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url-8080}}/api/fuel/refuels",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "fuel",
-                "refuels"
-              ]
             }
-          },
-          "response": []
-        },
-        {
-          "name": "list-refuels",
+          ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{url-8080}}/api/fuel/refuels?vehicle=6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01&from=2026-09-01&to=2026-09-30&page=0&size=20",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "fuel",
-                "refuels"
-              ],
-              "query": [
-                {
-                  "key": "vehicle",
-                  "value": "6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01"
-                },
-                {
-                  "key": "from",
-                  "value": "2026-09-01"
-                },
-                {
-                  "key": "to",
-                  "value": "2026-09-30"
-                },
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "20"
-                }
-              ]
+              "raw": "{{url-8080}}/api/drivers?size=20",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "drivers"],
+              "query": [{"key": "size", "value": "20"}]
             }
-          },
-          "response": []
-        },
-        {
-          "name": "export-csv",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8087}}/api/fuel/refuels/export",
-              "host": [
-                "{{url-8087}}"
-              ],
-              "path": [
-                "api",
-                "fuel",
-                "refuels",
-                "export"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "consumption",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/fuel/consumption?from=2026-09-01&to=2026-09-30",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "fuel",
-                "consumption"
-              ],
-              "query": [
-                {
-                  "key": "from",
-                  "value": "2026-09-01"
-                },
-                {
-                  "key": "to",
-                  "value": "2026-09-30"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "stats",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/fuel/stats?from=2026-09-01&to=2026-09-30&granularity=WEEK&vehicle=6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "fuel",
-                "stats"
-              ],
-              "query": [
-                {
-                  "key": "from",
-                  "value": "2026-09-01"
-                },
-                {
-                  "key": "to",
-                  "value": "2026-09-30"
-                },
-                {
-                  "key": "granularity",
-                  "value": "WEEK"
-                },
-                {
-                  "key": "vehicle",
-                  "value": "6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01"
-                }
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "maintenance",
-      "item": [
-        {
-          "name": "list-plan",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
-              }
-            ],
-            "url": {
-              "raw": "{{url-8086}}/api/maintenance/plans?active=true",
-              "host": [
-                "{{url-8086}}"
-              ],
-              "path": [
-                "api",
-                "maintenance",
-                "plans"
-              ],
-              "query": [
-                {
-                  "key": "vehicle",
-                  "value": "176ccebf-a473-43ab-8862-e874871fa242",
-                  "disabled": true
-                },
-                {
-                  "key": "type",
-                  "value": "OIL_CHANGE",
-                  "disabled": true
-                },
-                {
-                  "key": "active",
-                  "value": "true"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "create-plan",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"vehicleId\": \"4fe0b7eb-3390-413a-9bd1-799d25a39e84\",\r\n    \"type\": \"OIL_CHANGE\",\r\n    \"intervalKm\": 15000,\r\n    \"intervalDays\": 200,\r\n    \"lastDoneAt\": null,\r\n    \"lastDoneKm\": null\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url-8086}}/api/maintenance/plans",
-              "host": [
-                "{{url-8086}}"
-              ],
-              "path": [
-                "api",
-                "maintenance",
-                "plans"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "list-orders",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
-              }
-            ],
-            "url": {
-              "raw": "{{url-8086}}/api/maintenance/orders?vehicle=a04b0b23-fb99-4238-b906-6f322795b1e3",
-              "host": [
-                "{{url-8086}}"
-              ],
-              "path": [
-                "api",
-                "maintenance",
-                "orders"
-              ],
-              "query": [
-                {
-                  "key": "vehicle",
-                  "value": "a04b0b23-fb99-4238-b906-6f322795b1e3"
-                },
-                {
-                  "key": "status",
-                  "value": "PENDING",
-                  "disabled": true
-                },
-                {
-                  "key": "type",
-                  "value": "OIL_CHANGE",
-                  "disabled": true
-                },
-                {
-                  "key": "dueBefore",
-                  "value": "2026-11-10",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "start-order",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8086}}/api/maintenance/orders/16c9a02d-5a7c-4809-85df-e514fc4499ce/start",
-              "host": [
-                "{{url-8086}}"
-              ],
-              "path": [
-                "api",
-                "maintenance",
-                "orders",
-                "16c9a02d-5a7c-4809-85df-e514fc4499ce",
-                "start"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "complete-orders",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"cost\": 185.50,\r\n    \"odometerKm\": 400210,\r\n    \"workshop\": \"Taller Central Madrid\",\r\n    \"notes\": \"Cambio de aceite y filtros\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url-8086}}/api/maintenance/orders/16c9a02d-5a7c-4809-85df-e514fc4499ce/complete",
-              "host": [
-                "{{url-8086}}"
-              ],
-              "path": [
-                "api",
-                "maintenance",
-                "orders",
-                "16c9a02d-5a7c-4809-85df-e514fc4499ce",
-                "complete"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "stats",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/maintenance/stats?from=2026-09-01&to=2026-09-30&granularity=DAY",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "maintenance",
-                "stats"
-              ],
-              "query": [
-                {
-                  "key": "from",
-                  "value": "2026-09-01"
-                },
-                {
-                  "key": "to",
-                  "value": "2026-09-30"
-                },
-                {
-                  "key": "granularity",
-                  "value": "DAY"
-                },
-                {
-                  "key": "vehicle",
-                  "value": "",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "alerts",
-      "item": [
-        {
-          "name": "list-alerts",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/alerts?status=OPEN&severity=CRITICAL",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "alerts"
-              ],
-              "query": [
-                {
-                  "key": "status",
-                  "value": "OPEN"
-                },
-                {
-                  "key": "severity",
-                  "value": "CRITICAL"
-                },
-                {
-                  "key": "type",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "vehicle",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "page",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "size",
-                  "value": "",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "acknowledge-alert",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"comment\": \"Cita pedida con el taller para el jueves\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url-8080}}/api/alerts/7f3a9c10-7c4a-4e55-b1a0-5d9e2c7f1a01/acknowledge",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "alerts",
-                "7f3a9c10-7c4a-4e55-b1a0-5d9e2c7f1a01",
-                "acknowledge"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "list-rules",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/alerts/rules",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "alerts",
-                "rules"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "update-rule",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"enabled\": true,\r\n  \"severity\": \"CRITICAL\",\r\n  \"params\": {\r\n    \"daysBefore\": 14\r\n  }\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url-8080}}/api/alerts/rules/MAINTENANCE_DUE",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "alerts",
-                "rules",
-                "MAINTENANCE_DUE"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "alerts-evaluate",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8088}}/api/alerts/evaluate",
-              "host": [
-                "{{url-8088}}"
-              ],
-              "path": [
-                "api",
-                "alerts",
-                "evaluate"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "alerts-stats",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/alerts/stats?from=2026-09-01&to=2026-09-30&granularity=DAY",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "alerts",
-                "stats"
-              ],
-              "query": [
-                {
-                  "key": "from",
-                  "value": "2026-09-01"
-                },
-                {
-                  "key": "to",
-                  "value": "2026-09-30"
-                },
-                {
-                  "key": "granularity",
-                  "value": "DAY"
-                }
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "routes",
-      "item": [
-        {
-          "name": "list-route",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8085}}/api/routes",
-              "host": [
-                "{{url-8085}}"
-              ],
-              "path": [
-                "api",
-                "routes"
-              ],
-              "query": [
-                {
-                  "key": "vehicle",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "driver",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "status",
-                  "value": "PLANNED",
-                  "disabled": true
-                },
-                {
-                  "key": "from",
-                  "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "to",
-                  "value": "",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "get-route",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/routes/5b9e2c10-7f4a-4d55-b1a0-3c8e6f7a9201",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "routes",
-                "5b9e2c10-7f4a-4d55-b1a0-3c8e6f7a9201"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "create-route",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"vehicleId\": \"977e1daa-6fa9-4917-98ce-510f5b187978\",\r\n    \"driverId\": \"8d9fc9e9-d951-4675-915b-d31b7e609fe6\",\r\n    \"origin\": \"Madrid - Centro Logístico\",\r\n    \"destination\": \"Valencia - Puerto\",\r\n    \"plannedStart\": \"2026-10-06T07:00:00Z\",\r\n    \"estimatedDurationMin\": 240,\r\n    \"plannedDistanceKm\": 355.0\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url-8085}}/api/routes",
-              "host": [
-                "{{url-8085}}"
-              ],
-              "path": [
-                "api",
-                "routes"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "start-route",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/routes/5b9e2c10-7f4a-4d55-b1a0-3c8e6f7a9201/start",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "routes",
-                "5b9e2c10-7f4a-4d55-b1a0-3c8e6f7a9201",
-                "start"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "complete-route",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"actualDistanceKm\": 362.4,\r\n  \"notes\": \"Entrega sin incidencias\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url-8080}}/api/routes/5b9e2c10-7f4a-4d55-b1a0-3c8e6f7a9201/complete",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "routes",
-                "5b9e2c10-7f4a-4d55-b1a0-3c8e6f7a9201",
-                "complete"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "export-csv",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/routes/export?status=COMPLETED",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "routes",
-                "export"
-              ],
-              "query": [
-                {
-                  "key": "status",
-                  "value": "COMPLETED"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "routes-stats",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/routes/stats?from=2026-09-01&to=2026-09-30&granularity=DAY",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "routes",
-                "stats"
-              ],
-              "query": [
-                {
-                  "key": "from",
-                  "value": "2026-09-01"
-                },
-                {
-                  "key": "to",
-                  "value": "2026-09-30"
-                },
-                {
-                  "key": "granularity",
-                  "value": "DAY"
-                },
-                {
-                  "key": "vehicle",
-                  "value": "",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "dashboard",
-      "item": [
-        {
-          "name": "get-summary",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
-              }
-            ],
-            "url": {
-              "raw": "{{url-8089}}/api/dashboard?days=30",
-              "host": [
-                "{{url-8089}}"
-              ],
-              "path": [
-                "api",
-                "dashboard"
-              ],
-              "query": [
-                {
-                  "key": "days",
-                  "value": "30"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "get-timeseries",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
-              }
-            ],
-            "url": {
-              "raw": "{{url-8089}}/api/dashboard/timeseries?metrics=DISTANCE_KM,FUEL_COST&from=2026-09-01&to=2026-10-14&granularity=DAY",
-              "host": [
-                "{{url-8089}}"
-              ],
-              "path": [
-                "api",
-                "dashboard",
-                "timeseries"
-              ],
-              "query": [
-                {
-                  "key": "metrics",
-                  "value": "DISTANCE_KM,FUEL_COST"
-                },
-                {
-                  "key": "from",
-                  "value": "2026-09-01"
-                },
-                {
-                  "key": "to",
-                  "value": "2026-10-14"
-                },
-                {
-                  "key": "granularity",
-                  "value": "DAY"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "get-vehicles-ranking",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
-              }
-            ],
-            "url": {
-              "raw": "{{url-8089}}/api/dashboard/vehicles/ranking?metric=FUEL_COST&days=30&limit=5&type=VAN",
-              "host": [
-                "{{url-8089}}"
-              ],
-              "path": [
-                "api",
-                "dashboard",
-                "vehicles",
-                "ranking"
-              ],
-              "query": [
-                {
-                  "key": "metric",
-                  "value": "FUEL_COST"
-                },
-                {
-                  "key": "days",
-                  "value": "30"
-                },
-                {
-                  "key": "limit",
-                  "value": "5"
-                },
-                {
-                  "key": "type",
-                  "value": "VAN"
-                }
-              ]
-            }
-          },
-          "response": []
+          }
         }
       ]
     },
@@ -1362,216 +282,620 @@
       "name": "vehicles",
       "item": [
         {
-          "name": "list-vehicles",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
+          "name": "register",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var ts = Date.now();",
+                  "var last4 = ('0000' + (ts % 10000)).slice(-4);",
+                  "var suffix = String.fromCharCode(65 + (ts % 26)) + String.fromCharCode(65 + ((ts / 7 | 0) % 26)) + String.fromCharCode(65 + ((ts / 13 | 0) % 26));",
+                  "pm.environment.set('vehiclePlate', last4 + '-' + suffix);",
+                  "pm.environment.set('vehicleMake', 'Mercedes-Benz');",
+                  "pm.environment.set('vehicleModel', 'Actros');",
+                  "pm.environment.set('vehicleYear', new Date().getFullYear());",
+                  "pm.environment.set('vehicleOdometerKm', 1000 + (ts % 99999));",
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
               }
-            ],
-            "url": {
-              "raw": "{{url-8082}}/api/vehicles",
-              "host": [
-                "{{url-8082}}"
-              ],
-              "path": [
-                "api",
-                "vehicles"
-              ],
-              "query": [
-                {
-                  "key": "status",
-                  "value": "AVAILABLE",
-                  "disabled": true
-                },
-                {
-                  "key": "type",
-                  "value": "MOTORCYCLE",
-                  "disabled": true
-                },
-                {
-                  "key": "plate",
-                  "value": "9",
-                  "disabled": true
-                },
-                {
-                  "key": "size",
-                  "value": "30",
-                  "disabled": true
-                },
-                {
-                  "key": "page",
-                  "value": "0",
-                  "disabled": true
-                }
-              ]
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('register vehicle 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201]);",
+                  "});",
+                  "var body = pm.response.json();",
+                  "if (body && body.id) {",
+                  "    pm.environment.set('vehicleId', body.id);",
+                  "}",
+                  "pm.test('captured vehicleId', function () {",
+                  "    pm.expect(pm.environment.get('vehicleId')).to.be.a('string').and.not.empty;",
+                  "});"
+                ]
+              }
             }
-          },
-          "response": []
-        },
-        {
-          "name": "register-vehicle",
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              {"key": "Content-Type", "value": "application/json"}
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"plate\": \"9012-PQR\",\r\n    \"make\": \"Mercedes-Benz\",\r\n    \"model\": \"Actros\",\r\n    \"year\": 2023,\r\n    \"type\": \"TRUCK\",\r\n    \"fuelType\": \"DIESEL\",\r\n    \"tankCapacityL\": 400,\r\n    \"odometerKm\": 12000\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"plate\": \"{{vehiclePlate}}\",\n  \"make\": \"{{vehicleMake}}\",\n  \"model\": \"{{vehicleModel}}\",\n  \"year\": {{vehicleYear}},\n  \"type\": \"TRUCK\",\n  \"fuelType\": \"DIESEL\",\n  \"tankCapacityL\": 400,\n  \"odometerKm\": {{vehicleOdometerKm}}\n}"
             },
             "url": {
               "raw": "{{url-8080}}/api/vehicles",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "vehicles"
-              ]
+              "host": ["{{url-8080}}"],
+              "path": ["api", "vehicles"]
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "get-summary",
+          "name": "list",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('list vehicles 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{url-8082}}/api/vehicles/summary",
-              "host": [
-                "{{url-8082}}"
-              ],
-              "path": [
-                "api",
-                "vehicles",
-                "summary"
-              ]
+              "raw": "{{url-8080}}/api/vehicles?size=20",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "vehicles"],
+              "query": [{"key": "size", "value": "20"}]
             }
-          },
-          "response": []
-        },
+          }
+        }
+      ]
+    },
+    {
+      "name": "routes",
+      "item": [
         {
-          "name": "find-id",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
+          "name": "create",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var now = new Date();",
+                  "var start = new Date(now.getTime() + 60 * 60 * 1000);",
+                  "pm.environment.set('routePlannedStart', start.toISOString());",
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
               }
-            ],
-            "url": {
-              "raw": "{{url-8080}}/api/vehicles/d8ce4f29-dd16-4a54-ac28-63de824cf2fc",
-              "host": [
-                "{{url-8080}}"
-              ],
-              "path": [
-                "api",
-                "vehicles",
-                "d8ce4f29-dd16-4a54-ac28-63de824cf2fc"
-              ]
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('create route 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201]);",
+                  "});",
+                  "var body = pm.response.json();",
+                  "if (body && body.id) {",
+                  "    pm.environment.set('routeId', body.id);",
+                  "}",
+                  "pm.test('captured routeId', function () {",
+                  "    pm.expect(pm.environment.get('routeId')).to.be.a('string').and.not.empty;",
+                  "});"
+                ]
+              }
             }
-          },
-          "response": []
-        },
-        {
-          "name": "update",
+          ],
           "request": {
-            "method": "PUT",
+            "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              {"key": "Content-Type", "value": "application/json"}
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"make\": \"Hyundai\",\r\n    \"model\": \"Kona\",\r\n    \"year\": 2020,\r\n    \"type\": \"CAR\",\r\n    \"fuelType\": \"DIESEL\",\r\n    \"tankCapacityL\": 3\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"driverId\": \"{{driverId}}\",\n  \"origin\": \"Madrid Centro Logistico\",\n  \"destination\": \"Valencia Puerto\",\n  \"plannedStart\": \"{{routePlannedStart}}\",\n  \"estimatedDurationMin\": 240,\n  \"plannedDistanceKm\": 355.0\n}"
             },
             "url": {
-              "raw": "{{url-8082}}/api/vehicles/ddf6f932-f613-4331-ab59-9d61701d50ae",
-              "host": [
-                "{{url-8082}}"
-              ],
-              "path": [
-                "api",
-                "vehicles",
-                "ddf6f932-f613-4331-ab59-9d61701d50ae"
-              ]
+              "raw": "{{url-8080}}/api/routes",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "routes"]
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "update-status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
+          "name": "start",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
               }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('start route 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url-8080}}/api/routes/{{routeId}}/start",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "routes", "{{routeId}}", "start"]
+            }
+          }
+        },
+        {
+          "name": "complete",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('complete route 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"status\": \"IN_USE\",\r\n    \"odometerKm\": 453100\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"actualDistanceKm\": 362.4,\n  \"notes\": \"E2E collection: entrega sin incidencias\"\n}"
             },
             "url": {
-              "raw": "{{url-8082}}/api/vehicles/d8ce4f29-dd16-4a54-ac28-63de824cf2fc/status",
-              "host": [
-                "{{url-8082}}"
-              ],
-              "path": [
-                "api",
-                "vehicles",
-                "d8ce4f29-dd16-4a54-ac28-63de824cf2fc",
-                "status"
-              ]
+              "raw": "{{url-8080}}/api/routes/{{routeId}}/complete",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "routes", "{{routeId}}", "complete"]
             }
-          },
-          "response": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "fuel",
+      "item": [
+        {
+          "name": "refuel",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var now = new Date();",
+                  "pm.environment.set('refueledAt', now.toISOString());",
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('refuel 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201]);",
+                  "});",
+                  "var body = pm.response.json();",
+                  "if (body && body.id) {",
+                  "    pm.environment.set('refuelId', body.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"refueledAt\": \"{{refueledAt}}\",\n  \"liters\": 50.0,\n  \"pricePerLiter\": 1.62,\n  \"odometerKm\": 1100,\n  \"fullTank\": true,\n  \"station\": \"E2E Test Station\"\n}"
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/fuel/refuels",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "fuel", "refuels"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "maintenance",
+      "item": [
+        {
+          "name": "plans/create",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('create plan 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201]);",
+                  "});",
+                  "var body = pm.response.json();",
+                  "if (body && body.id) {",
+                  "    pm.environment.set('planId', body.id);",
+                  "}",
+                  "pm.test('captured planId', function () {",
+                  "    pm.expect(pm.environment.get('planId')).to.be.a('string').and.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"type\": \"OIL_CHANGE\",\n  \"intervalKm\": 15000,\n  \"intervalDays\": 200,\n  \"lastDoneAt\": null,\n  \"lastDoneKm\": null\n}"
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/maintenance/plans",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "maintenance", "plans"]
+            }
+          }
+        },
+        {
+          "name": "plans/list",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('list plans 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url-8080}}/api/maintenance/plans?active=true",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "maintenance", "plans"],
+              "query": [{"key": "active", "value": "true"}]
+            }
+          }
+        },
+        {
+          "name": "orders/list",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('list orders 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);",
+                  "});",
+                  "var body = pm.response.json();",
+                  "var firstId = '';",
+                  "if (body && Array.isArray(body.content) && body.content.length > 0) {",
+                  "    firstId = body.content[0].id;",
+                  "    pm.environment.set('orderId', firstId);",
+                  "} else {",
+                  "    pm.environment.set('orderId', '');",
+                  "}",
+                  "pm.test('order list handled (may be empty on fresh boot)', function () {",
+                  "    pm.expect(pm.environment.get('orderId')).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url-8080}}/api/maintenance/orders?size=20",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "maintenance", "orders"],
+              "query": [{"key": "size", "value": "20"}]
+            }
+          }
+        },
+        {
+          "name": "orders/start",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}",
+                  "var orderId = pm.environment.get('orderId');",
+                  "if (!orderId) {",
+                  "    if (typeof pm.execution !== 'undefined' && pm.execution.skipRequest) {",
+                  "        pm.execution.skipRequest();",
+                  "    }",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('orderId')) {",
+                  "    this.skip();",
+                  "    return;",
+                  "}",
+                  "pm.test('start order 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url-8080}}/api/maintenance/orders/{{orderId}}/start",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "maintenance", "orders", "{{orderId}}", "start"]
+            }
+          }
+        },
+        {
+          "name": "orders/complete",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}",
+                  "var orderId = pm.environment.get('orderId');",
+                  "if (!orderId) {",
+                  "    if (typeof pm.execution !== 'undefined' && pm.execution.skipRequest) {",
+                  "        pm.execution.skipRequest();",
+                  "    }",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('orderId')) {",
+                  "    this.skip();",
+                  "    return;",
+                  "}",
+                  "pm.test('complete order 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cost\": 185.50,\n  \"odometerKm\": 1200,\n  \"workshop\": \"Taller Central E2E\",\n  \"notes\": \"Cambio de aceite y filtros (E2E)\"\n}"
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/maintenance/orders/{{orderId}}/complete",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "maintenance", "orders", "{{orderId}}", "complete"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "alerts",
+      "item": [
+        {
+          "name": "list",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('list alerts 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url-8080}}/api/alerts?size=20",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "alerts"],
+              "query": [{"key": "size", "value": "20"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "dashboard",
+      "item": [
+        {
+          "name": "summary",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var token = pm.environment.get('token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('dashboard summary 200', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url-8080}}/api/dashboard?days=30",
+              "host": ["{{url-8080}}"],
+              "path": ["api", "dashboard"],
+              "query": [{"key": "days", "value": "30"}]
+            }
+          }
         }
       ]
     }
@@ -1581,10 +905,18 @@
       "listen": "prerequest",
       "script": {
         "type": "text/javascript",
-        "packages": {},
-        "requests": {},
         "exec": [
-          ""
+          "pm.environment.unset('token');",
+          "pm.environment.unset('userId');",
+          "pm.environment.unset('driverId');",
+          "pm.environment.unset('vehicleId');",
+          "pm.environment.unset('routeId');",
+          "pm.environment.unset('planId');",
+          "pm.environment.unset('orderId');",
+          "pm.environment.unset('refuelId');",
+          "pm.environment.unset('registerUsername');",
+          "pm.environment.unset('registerEmail');",
+          "pm.environment.unset('registerPassword');"
         ]
       }
     },
@@ -1592,8 +924,6 @@
       "listen": "test",
       "script": {
         "type": "text/javascript",
-        "packages": {},
-        "requests": {},
         "exec": [
           ""
         ]
