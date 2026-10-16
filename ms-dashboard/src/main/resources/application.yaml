@@ -29,6 +29,19 @@ management:
 jwt:
   secret: ${JWT_SECRET}
 
+internal:
+  api-key: ${INTERNAL_API_KEY}
+
+clients:
+  vehicle-service: ${VEHICLES_SERVICE_URL:http://localhost:8082}
+  routes-service: ${ROUTES_SERVICE_URL:http://localhost:8085}
+  fuel-service: ${FUEL_SERVICE_URL:http://localhost:8087}
+  maintenance-service: ${MAINTENANCE_SERVICE_URL:http://localhost:8086}
+  alerts-service: ${ALERTS_SERVICE_URL:http://localhost:8088}
+
+dashboard:
+  cache:
+    ttl-seconds: ${DASHBOARD_CACHE_TTL_SECONDS:60}
 x-resilience-defaults: &cb-defaults
   slidingWindowType: COUNT_BASED
   slidingWindowSize: 10

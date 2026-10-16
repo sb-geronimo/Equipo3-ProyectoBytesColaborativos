@@ -6,14 +6,14 @@
 
 FleetControl es un backend de gestión de flotas que se construye en un sprint de 2 semanas y no depende de ninguna API externa: los datos los generan y almacenan los propios servicios.
 
-| Campo | Detalle |
-| --- | --- |
-| Nombre del proyecto | FleetControl — Plataforma de Gestión de Flotas |
-| Tipo | Backend con arquitectura de microservicios autónomos |
-| API externa | Ninguna. Los datos de demostración los genera un seeder propio |
-| Duración | 2 semanas (1 sprint) |
-| Metodología | Scrum |
-| Modalidad | Cada equipo construye el sistema completo de forma independiente |
+| Campo               | Detalle                                                          |
+| ------------------- | ---------------------------------------------------------------- |
+| Nombre del proyecto | FleetControl — Plataforma de Gestión de Flotas                   |
+| Tipo                | Backend con arquitectura de microservicios autónomos             |
+| API externa         | Ninguna. Los datos de demostración los genera un seeder propio   |
+| Duración            | 2 semanas (1 sprint)                                             |
+| Metodología         | Scrum                                                            |
+| Modalidad           | Cada equipo construye el sistema completo de forma independiente |
 
 ### Descripción del sistema
 
@@ -23,17 +23,17 @@ Cada equipo debe diseñar, implementar, documentar y desplegar el sistema comple
 
 ### Microservicios del sistema
 
-| Microservicio | Puerto | Responsabilidad | Consume a |
-| --- | --- | --- | --- |
-| ms-gateway | 8080 | Punto de entrada, enrutamiento y rate limiting | Todos los servicios |
-| ms-auth | 8081 | Registro, login y emisión de tokens JWT | — |
-| ms-vehicles | 8082 | Inventario de vehículos, estado y odómetro | — |
-| ms-drivers | 8083 | Conductores, licencias y estado | — |
-| ms-routes | 8085 | Planificación, ejecución e historial de rutas | ms-vehicles, ms-drivers |
-| ms-maintenance | 8086 | Planes de mantenimiento programado y órdenes de trabajo | ms-vehicles |
-| ms-fuel | 8087 | Repostajes y consumo de combustible | ms-vehicles |
-| ms-alerts | 8088 | Reglas y alertas de revisión, licencia y consumo | ms-vehicles, ms-drivers, ms-maintenance, ms-fuel |
-| ms-dashboard | 8089 | Resumen ejecutivo y series temporales agregadas | ms-vehicles, ms-routes, ms-fuel, ms-maintenance, ms-alerts |
+| Microservicio  | Puerto | Responsabilidad                                         | Consume a                                                  |
+| -------------- | ------ | ------------------------------------------------------- | ---------------------------------------------------------- |
+| ms-gateway     | 8080   | Punto de entrada, enrutamiento y rate limiting          | Todos los servicios                                        |
+| ms-auth        | 8081   | Registro, login y emisión de tokens JWT                 | —                                                          |
+| ms-vehicles    | 8082   | Inventario de vehículos, estado y odómetro              | —                                                          |
+| ms-drivers     | 8083   | Conductores, licencias y estado                         | —                                                          |
+| ms-routes      | 8085   | Planificación, ejecución e historial de rutas           | ms-vehicles, ms-drivers                                    |
+| ms-maintenance | 8086   | Planes de mantenimiento programado y órdenes de trabajo | ms-vehicles                                                |
+| ms-fuel        | 8087   | Repostajes y consumo de combustible                     | ms-vehicles                                                |
+| ms-alerts      | 8088   | Reglas y alertas de revisión, licencia y consumo        | ms-vehicles, ms-drivers, ms-maintenance, ms-fuel           |
+| ms-dashboard   | 8089   | Resumen ejecutivo y series temporales agregadas         | ms-vehicles, ms-routes, ms-fuel, ms-maintenance, ms-alerts |
 
 Todos los servicios de dominio validan el JWT emitido por ms-auth. Las llamadas entre servicios usan una clave interna compartida, descrita en la sección de comunicación.
 
@@ -41,25 +41,25 @@ Todos los servicios de dominio validan el JWT emitido por ms-auth. Las llamadas 
 
 El stack es Java 17 con Spring Boot 3.x y PostgreSQL, y se añaden tres piezas pensadas para un sistema sin API externa: migraciones con Flyway, caché local con Caffeine y generación de datos con Datafaker.
 
-| Categoría | Tecnología |
-| --- | --- |
-| Lenguaje | Java 17 |
-| Framework | Spring Boot 3.x |
-| Gateway | Spring Cloud Gateway |
-| Seguridad | Spring Security + JWT (HS256) |
-| Base de datos | PostgreSQL 15 (una base de datos por microservicio, todas en una instancia durante el desarrollo) |
-| Migraciones | Flyway |
-| Comunicación | OpenFeign |
-| Tareas programadas | Spring @Scheduled |
-| Caché | Caffeine (en memoria) |
-| Resiliencia | Resilience4j (timeout y circuit breaker en llamadas entre servicios) |
-| Datos de demostración | Datafaker con semilla fija |
-| Documentación | Swagger UI / OpenAPI 3.0 |
-| Testing | JUnit 5 + Mockito + Testcontainers + Postman |
-| Mappers | MapStruct |
-| Utilidades | Lombok |
-| Contenerización | Docker + Docker Compose |
-| Build | Maven o Gradle |
+| Categoría             | Tecnología                                                                                        |
+| --------------------- | ------------------------------------------------------------------------------------------------- |
+| Lenguaje              | Java 17                                                                                           |
+| Framework             | Spring Boot 3.x                                                                                   |
+| Gateway               | Spring Cloud Gateway                                                                              |
+| Seguridad             | Spring Security + JWT (HS256)                                                                     |
+| Base de datos         | PostgreSQL 15 (una base de datos por microservicio, todas en una instancia durante el desarrollo) |
+| Migraciones           | Flyway                                                                                            |
+| Comunicación          | OpenFeign                                                                                         |
+| Tareas programadas    | Spring @Scheduled                                                                                 |
+| Caché                 | Caffeine (en memoria)                                                                             |
+| Resiliencia           | Resilience4j (timeout y circuit breaker en llamadas entre servicios)                              |
+| Datos de demostración | Datafaker con semilla fija                                                                        |
+| Documentación         | Swagger UI / OpenAPI 3.0                                                                          |
+| Testing               | JUnit 5 + Mockito + Testcontainers + Postman                                                      |
+| Mappers               | MapStruct                                                                                         |
+| Utilidades            | Lombok                                                                                            |
+| Contenerización       | Docker + Docker Compose                                                                           |
+| Build                 | Maven o Gradle                                                                                    |
 
 ### Generación de datos y series temporales
 
@@ -75,23 +75,23 @@ Cada servicio de dominio genera su propio histórico de 90 días al arrancar con
 
 #### Volumen generado
 
-| Servicio | Datos generados | Volumen aproximado |
-| --- | --- | --- |
-| ms-vehicles | Vehículos de los cuatro tipos y de varios estados | 25 |
-| ms-drivers | Conductores; 3 con licencia próxima a caducar y 1 caducada | 20 |
-| ms-routes | Rutas completadas en días laborables y 3 rutas planificadas | ≈ 1.300 |
-| ms-fuel | Repostajes con consumo coherente con el tipo de vehículo | ≈ 300 |
+| Servicio       | Datos generados                                                                                                    | Volumen aproximado         |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------- |
+| ms-vehicles    | Vehículos de los cuatro tipos y de varios estados                                                                  | 25                         |
+| ms-drivers     | Conductores; 3 con licencia próxima a caducar y 1 caducada                                                         | 20                         |
+| ms-routes      | Rutas completadas en días laborables y 3 rutas planificadas                                                        | ≈ 1.300                    |
+| ms-fuel        | Repostajes con consumo coherente con el tipo de vehículo                                                           | ≈ 300                      |
 | ms-maintenance | Planes por vehículo y órdenes completadas; 5 órdenes pendientes con vencimiento en los próximos 7 días y 1 vencida | ≈ 50 planes y ≈ 40 órdenes |
-| ms-alerts | No genera datos. El evaluador crea las alertas a partir de los demás servicios | — |
+| ms-alerts      | No genera datos. El evaluador crea las alertas a partir de los demás servicios                                     | —                          |
 
 #### Realismo de los datos
 
 | Tipo de vehículo | Consumo base (L/100 km) |
-| --- | --- |
-| CAR | 6,5 |
-| VAN | 10,5 |
-| TRUCK | 27 |
-| MOTORCYCLE | 4,2 |
+| ---------------- | ----------------------- |
+| CAR              | 6,5                     |
+| VAN              | 10,5                    |
+| TRUCK            | 27                      |
+| MOTORCYCLE       | 4,2                     |
 
 Cada repostaje varía un ±8 % sobre el consumo base y el precio por litro oscila entre 1,45 y 1,75 EUR con tendencia semanal.
 
@@ -105,14 +105,14 @@ Los servicios que poseen datos con fecha exponen `GET /stats` con los parámetro
 - Los periodos sin datos se devuelven con valor 0, para que la serie no tenga huecos.
 - Todas las fechas se calculan en UTC.
 
-| Métrica | Servicio de origen | Unidad |
-| --- | --- | --- |
-| DISTANCE_KM | ms-routes | km |
-| FUEL_LITERS | ms-fuel | L |
-| FUEL_COST | ms-fuel | EUR |
-| CONSUMPTION_L100KM | ms-fuel | L/100 km |
-| MAINTENANCE_COST | ms-maintenance | EUR |
-| ALERTS_CREATED | ms-alerts | alertas |
+| Métrica            | Servicio de origen | Unidad   |
+| ------------------ | ------------------ | -------- |
+| DISTANCE_KM        | ms-routes          | km       |
+| FUEL_LITERS        | ms-fuel            | L        |
+| FUEL_COST          | ms-fuel            | EUR      |
+| CONSUMPTION_L100KM | ms-fuel            | L/100 km |
+| MAINTENANCE_COST   | ms-maintenance     | EUR      |
+| ALERTS_CREATED     | ms-alerts          | alertas  |
 
 ## ms-gateway (Puerto 8080)
 
@@ -122,16 +122,16 @@ Punto de entrada único al sistema. Redirige cada petición al microservicio cor
 
 ### Tabla de enrutamiento
 
-| Prefijo de ruta | Destino |
-| --- | --- |
-| `/api/auth/**` | ms-auth:8081 |
-| `/api/vehicles/**` | ms-vehicles:8082 |
-| `/api/drivers/**` | ms-drivers:8083 |
-| `/api/routes/**` | ms-routes:8085 |
+| Prefijo de ruta       | Destino             |
+| --------------------- | ------------------- |
+| `/api/auth/**`        | ms-auth:8081        |
+| `/api/vehicles/**`    | ms-vehicles:8082    |
+| `/api/drivers/**`     | ms-drivers:8083     |
+| `/api/routes/**`      | ms-routes:8085      |
 | `/api/maintenance/**` | ms-maintenance:8086 |
-| `/api/fuel/**` | ms-fuel:8087 |
-| `/api/alerts/**` | ms-alerts:8088 |
-| `/api/dashboard/**` | ms-dashboard:8089 |
+| `/api/fuel/**`        | ms-fuel:8087        |
+| `/api/alerts/**`      | ms-alerts:8088      |
+| `/api/dashboard/**`   | ms-dashboard:8089   |
 
 ### Endpoints requeridos
 
@@ -185,10 +185,10 @@ Gestiona el registro y la autenticación de usuarios. Emite tokens JWT (HS256, v
 
 ### Roles
 
-| Rol | Permisos |
-| --- | --- |
+| Rol     | Permisos                                                                                                                                              |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | MANAGER | Gestiona vehículos, conductores, rutas, repostajes y mantenimientos, consulta el dashboard y reconoce alertas. Es el rol que se asigna al registrarse |
-| ADMIN | Todo lo de MANAGER, además de modificar las reglas de alertas y lanzar evaluaciones manuales. Lo crea el seeder del perfil demo |
+| ADMIN   | Todo lo de MANAGER, además de modificar las reglas de alertas y lanzar evaluaciones manuales. Lo crea el seeder del perfil demo                       |
 
 ### Endpoints requeridos
 
@@ -307,15 +307,15 @@ Authorization: Bearer <token>
 
 #### User
 
-| Campo | Tipo | Descripción |
-| --- | --- | --- |
-| id | UUID | Identificador único |
-| username | String | Nombre de usuario (único) |
-| email | String | Correo electrónico (único) |
-| password | String | Hash bcrypt de la contraseña |
-| role | Enum | Rol del usuario |
-| createdAt | Instant | Fecha de registro |
-| updatedAt | Instant | Fecha de actualización |
+| Campo     | Tipo    | Descripción                  |
+| --------- | ------- | ---------------------------- |
+| id        | UUID    | Identificador único          |
+| username  | String  | Nombre de usuario (único)    |
+| email     | String  | Correo electrónico (único)   |
+| password  | String  | Hash bcrypt de la contraseña |
+| role      | Enum    | Rol del usuario              |
+| createdAt | Instant | Fecha de registro            |
+| updatedAt | Instant | Fecha de actualización       |
 
 #### Enums — ms-auth
 
@@ -505,20 +505,20 @@ Mantiene el inventario de vehículos de la flota con su estado operativo y su od
 
 #### Vehicle
 
-| Campo | Tipo | Descripción |
-| --- | --- | --- |
-| id | UUID | Identificador único |
-| plate | String | Placa o matrícula (única) |
-| make | String | Marca |
-| model | String | Modelo |
-| year | Integer | Año de fabricación |
-| type | Enum | Tipo de vehículo |
-| fuelType | Enum | Tipo de combustible |
+| Campo         | Tipo    | Descripción                      |
+| ------------- | ------- | -------------------------------- |
+| id            | UUID    | Identificador único              |
+| plate         | String  | Placa o matrícula (única)        |
+| make          | String  | Marca                            |
+| model         | String  | Modelo                           |
+| year          | Integer | Año de fabricación               |
+| type          | Enum    | Tipo de vehículo                 |
+| fuelType      | Enum    | Tipo de combustible              |
 | tankCapacityL | Integer | Capacidad del depósito en litros |
-| odometerKm | Integer | Kilometraje acumulado |
-| status | Enum | Estado operativo |
-| createdAt | Instant | Fecha de alta |
-| updatedAt | Instant | Fecha de actualización |
+| odometerKm    | Integer | Kilometraje acumulado            |
+| status        | Enum    | Estado operativo                 |
+| createdAt     | Instant | Fecha de alta                    |
+| updatedAt     | Instant | Fecha de actualización           |
 
 #### Enums — ms-vehicles
 
@@ -634,18 +634,18 @@ Gestiona los conductores de la flota, su licencia de conducir y su estado. ms-ro
 
 #### Driver
 
-| Campo | Tipo | Descripción |
-| --- | --- | --- |
-| id | UUID | Identificador único |
-| fullName | String | Nombre completo |
-| email | String | Correo electrónico |
-| phone | String | Teléfono de contacto |
-| licenseNumber | String | Número de licencia (único) |
-| licenseCategory | Enum | Categoría de la licencia |
+| Campo            | Tipo      | Descripción                       |
+| ---------------- | --------- | --------------------------------- |
+| id               | UUID      | Identificador único               |
+| fullName         | String    | Nombre completo                   |
+| email            | String    | Correo electrónico                |
+| phone            | String    | Teléfono de contacto              |
+| licenseNumber    | String    | Número de licencia (único)        |
+| licenseCategory  | Enum      | Categoría de la licencia          |
 | licenseExpiresAt | LocalDate | Fecha de caducidad de la licencia |
-| status | Enum | Estado del conductor |
-| createdAt | Instant | Fecha de alta |
-| updatedAt | Instant | Fecha de actualización |
+| status           | Enum      | Estado del conductor              |
+| createdAt        | Instant   | Fecha de alta                     |
+| updatedAt        | Instant   | Fecha de actualización            |
 
 #### Enums — ms-drivers
 
@@ -784,9 +784,24 @@ Si falla el paso 4, se devuelve el vehículo a `AVAILABLE` como compensación.
   "granularity": "WEEK",
   "totals": { "routes": 302, "distanceKm": 28084.9 },
   "series": [
-    { "period": "2026-09-07", "routes": 97, "distanceKm": 9034.1, "avgDurationMin": 128 },
-    { "period": "2026-09-14", "routes": 104, "distanceKm": 9710.6, "avgDurationMin": 131 },
-    { "period": "2026-09-21", "routes": 101, "distanceKm": 9340.2, "avgDurationMin": 126 }
+    {
+      "period": "2026-09-07",
+      "routes": 97,
+      "distanceKm": 9034.1,
+      "avgDurationMin": 128
+    },
+    {
+      "period": "2026-09-14",
+      "routes": 104,
+      "distanceKm": 9710.6,
+      "avgDurationMin": 131
+    },
+    {
+      "period": "2026-09-21",
+      "routes": 101,
+      "distanceKm": 9340.2,
+      "avgDurationMin": 126
+    }
   ]
 }
 ```
@@ -795,26 +810,26 @@ Si falla el paso 4, se devuelve el vehículo a `AVAILABLE` como compensación.
 
 #### Route
 
-| Campo | Tipo | Descripción |
-| --- | --- | --- |
-| id | UUID | Identificador único |
-| vehicleId | UUID | Vehículo asignado (referencia a ms-vehicles) |
-| driverId | UUID | Conductor asignado (referencia a ms-drivers) |
-| origin | String | Punto de origen |
-| destination | String | Punto de destino |
-| plannedStart | Instant | Inicio planificado |
-| estimatedDurationMin | Integer | Duración estimada en minutos |
-| plannedDistanceKm | BigDecimal | Distancia planificada |
-| status | Enum | Estado de la ruta |
-| startedAt | Instant | Inicio real |
-| endedAt | Instant | Fin real |
-| startOdometerKm | Integer | Odómetro al empezar |
-| endOdometerKm | Integer | Odómetro al terminar |
-| actualDistanceKm | BigDecimal | Distancia recorrida |
-| notes | String | Observaciones |
-| createdBy | UUID | Usuario que planificó la ruta |
-| createdAt | Instant | Fecha de creación |
-| updatedAt | Instant | Fecha de actualización |
+| Campo                | Tipo       | Descripción                                  |
+| -------------------- | ---------- | -------------------------------------------- |
+| id                   | UUID       | Identificador único                          |
+| vehicleId            | UUID       | Vehículo asignado (referencia a ms-vehicles) |
+| driverId             | UUID       | Conductor asignado (referencia a ms-drivers) |
+| origin               | String     | Punto de origen                              |
+| destination          | String     | Punto de destino                             |
+| plannedStart         | Instant    | Inicio planificado                           |
+| estimatedDurationMin | Integer    | Duración estimada en minutos                 |
+| plannedDistanceKm    | BigDecimal | Distancia planificada                        |
+| status               | Enum       | Estado de la ruta                            |
+| startedAt            | Instant    | Inicio real                                  |
+| endedAt              | Instant    | Fin real                                     |
+| startOdometerKm      | Integer    | Odómetro al empezar                          |
+| endOdometerKm        | Integer    | Odómetro al terminar                         |
+| actualDistanceKm     | BigDecimal | Distancia recorrida                          |
+| notes                | String     | Observaciones                                |
+| createdBy            | UUID       | Usuario que planificó la ruta                |
+| createdAt            | Instant    | Fecha de creación                            |
+| updatedAt            | Instant    | Fecha de actualización                       |
 
 #### Enums — ms-routes
 
@@ -938,7 +953,7 @@ Gestiona el mantenimiento programado: planes recurrentes por vehículo y las ór
 
 ```json
 {
-  "cost": 185.50,
+  "cost": 185.5,
   "odometerKm": 45210,
   "workshop": "Taller Central Madrid",
   "notes": "Cambio de aceite y filtros"
@@ -954,7 +969,7 @@ Gestiona el mantenimiento programado: planes recurrentes por vehículo y las ór
   "type": "OIL_CHANGE",
   "status": "COMPLETED",
   "completedAt": "2026-10-08T09:40:00Z",
-  "cost": 185.50,
+  "cost": 185.5,
   "odometerKm": 45210,
   "workshop": "Taller Central Madrid",
   "plan": {
@@ -987,14 +1002,14 @@ Gestiona el mantenimiento programado: planes recurrentes por vehículo y las ór
   "granularity": "WEEK",
   "totals": { "orders": 9, "cost": 1480.75 },
   "series": [
-    { "period": "2026-09-07", "orders": 3, "cost": 420.00 },
+    { "period": "2026-09-07", "orders": 3, "cost": 420.0 },
     { "period": "2026-09-14", "orders": 4, "cost": 715.25 },
-    { "period": "2026-09-21", "orders": 2, "cost": 345.50 }
+    { "period": "2026-09-21", "orders": 2, "cost": 345.5 }
   ],
   "byType": [
-    { "type": "OIL_CHANGE", "orders": 4, "cost": 742.00 },
+    { "type": "OIL_CHANGE", "orders": 4, "cost": 742.0 },
     { "type": "BRAKE_CHECK", "orders": 3, "cost": 530.75 },
-    { "type": "TIRE_ROTATION", "orders": 2, "cost": 208.00 }
+    { "type": "TIRE_ROTATION", "orders": 2, "cost": 208.0 }
   ],
   "upcoming": { "overdue": 1, "dueIn7Days": 5 }
 }
@@ -1004,37 +1019,37 @@ Gestiona el mantenimiento programado: planes recurrentes por vehículo y las ór
 
 #### MaintenancePlan
 
-| Campo | Tipo | Descripción |
-| --- | --- | --- |
-| id | UUID | Identificador único |
-| vehicleId | UUID | Vehículo (referencia a ms-vehicles) |
-| type | Enum | Tipo de mantenimiento |
-| intervalKm | Integer | Intervalo en kilómetros (opcional) |
-| intervalDays | Integer | Intervalo en días (opcional) |
-| lastDoneAt | LocalDate | Fecha de la última intervención |
-| lastDoneKm | Integer | Odómetro en la última intervención |
-| nextDueAt | LocalDate | Fecha del próximo vencimiento |
-| nextDueKm | Integer | Odómetro del próximo vencimiento |
-| active | Boolean | Indica si el plan está vigente |
-| createdAt | Instant | Fecha de creación |
+| Campo        | Tipo      | Descripción                         |
+| ------------ | --------- | ----------------------------------- |
+| id           | UUID      | Identificador único                 |
+| vehicleId    | UUID      | Vehículo (referencia a ms-vehicles) |
+| type         | Enum      | Tipo de mantenimiento               |
+| intervalKm   | Integer   | Intervalo en kilómetros (opcional)  |
+| intervalDays | Integer   | Intervalo en días (opcional)        |
+| lastDoneAt   | LocalDate | Fecha de la última intervención     |
+| lastDoneKm   | Integer   | Odómetro en la última intervención  |
+| nextDueAt    | LocalDate | Fecha del próximo vencimiento       |
+| nextDueKm    | Integer   | Odómetro del próximo vencimiento    |
+| active       | Boolean   | Indica si el plan está vigente      |
+| createdAt    | Instant   | Fecha de creación                   |
 
 #### MaintenanceOrder
 
-| Campo | Tipo | Descripción |
-| --- | --- | --- |
-| id | UUID | Identificador único |
-| planId | UUID | Plan que la originó |
-| vehicleId | UUID | Vehículo (referencia a ms-vehicles) |
-| type | Enum | Tipo de mantenimiento |
-| status | Enum | Estado de la orden |
-| scheduledFor | LocalDate | Fecha prevista |
-| startedAt | Instant | Inicio de la intervención |
-| completedAt | Instant | Fin de la intervención |
-| odometerKm | Integer | Odómetro al completar |
-| cost | BigDecimal | Coste en EUR |
-| workshop | String | Taller que realizó la intervención |
-| notes | String | Observaciones |
-| createdAt | Instant | Fecha de creación |
+| Campo        | Tipo       | Descripción                         |
+| ------------ | ---------- | ----------------------------------- |
+| id           | UUID       | Identificador único                 |
+| planId       | UUID       | Plan que la originó                 |
+| vehicleId    | UUID       | Vehículo (referencia a ms-vehicles) |
+| type         | Enum       | Tipo de mantenimiento               |
+| status       | Enum       | Estado de la orden                  |
+| scheduledFor | LocalDate  | Fecha prevista                      |
+| startedAt    | Instant    | Inicio de la intervención           |
+| completedAt  | Instant    | Fin de la intervención              |
+| odometerKm   | Integer    | Odómetro al completar               |
+| cost         | BigDecimal | Coste en EUR                        |
+| workshop     | String     | Taller que realizó la intervención  |
+| notes        | String     | Observaciones                       |
+| createdAt    | Instant    | Fecha de creación                   |
 
 #### Enums — ms-maintenance
 
@@ -1171,11 +1186,34 @@ Por ejemplo, con un lleno a 45.000 km, un repostaje parcial de 20 L y un nuevo l
   "from": "2026-09-07",
   "to": "2026-09-27",
   "granularity": "WEEK",
-  "totals": { "liters": 3090.0, "cost": 5005.80, "avgPricePerLiter": 1.62, "avgL100km": 11.0 },
+  "totals": {
+    "liters": 3090.0,
+    "cost": 5005.8,
+    "avgPricePerLiter": 1.62,
+    "avgL100km": 11.0
+  },
   "series": [
-    { "period": "2026-09-07", "liters": 984.7, "cost": 1595.21, "avgPricePerLiter": 1.62, "avgL100km": 10.9 },
-    { "period": "2026-09-14", "liters": 1077.9, "cost": 1746.20, "avgPricePerLiter": 1.62, "avgL100km": 11.1 },
-    { "period": "2026-09-21", "liters": 1027.4, "cost": 1664.39, "avgPricePerLiter": 1.62, "avgL100km": 11.0 }
+    {
+      "period": "2026-09-07",
+      "liters": 984.7,
+      "cost": 1595.21,
+      "avgPricePerLiter": 1.62,
+      "avgL100km": 10.9
+    },
+    {
+      "period": "2026-09-14",
+      "liters": 1077.9,
+      "cost": 1746.2,
+      "avgPricePerLiter": 1.62,
+      "avgL100km": 11.1
+    },
+    {
+      "period": "2026-09-21",
+      "liters": 1027.4,
+      "cost": 1664.39,
+      "avgPricePerLiter": 1.62,
+      "avgL100km": 11.0
+    }
   ]
 }
 ```
@@ -1184,20 +1222,20 @@ Por ejemplo, con un lleno a 45.000 km, un repostaje parcial de 20 L y un nuevo l
 
 #### FuelRecord
 
-| Campo | Tipo | Descripción |
-| --- | --- | --- |
-| id | UUID | Identificador único |
-| vehicleId | UUID | Vehículo (referencia a ms-vehicles) |
-| refueledAt | Instant | Fecha y hora del repostaje |
-| fuelType | Enum | Tipo de combustible, tomado del vehículo |
-| liters | BigDecimal | Litros repostados |
-| pricePerLiter | BigDecimal | Precio por litro en EUR |
-| totalCost | BigDecimal | Coste total en EUR |
-| odometerKm | Integer | Odómetro en el momento del repostaje |
-| fullTank | Boolean | Indica si se llenó el depósito |
-| station | String | Estación de servicio |
+| Campo             | Tipo       | Descripción                                       |
+| ----------------- | ---------- | ------------------------------------------------- |
+| id                | UUID       | Identificador único                               |
+| vehicleId         | UUID       | Vehículo (referencia a ms-vehicles)               |
+| refueledAt        | Instant    | Fecha y hora del repostaje                        |
+| fuelType          | Enum       | Tipo de combustible, tomado del vehículo          |
+| liters            | BigDecimal | Litros repostados                                 |
+| pricePerLiter     | BigDecimal | Precio por litro en EUR                           |
+| totalCost         | BigDecimal | Coste total en EUR                                |
+| odometerKm        | Integer    | Odómetro en el momento del repostaje              |
+| fullTank          | Boolean    | Indica si se llenó el depósito                    |
+| station           | String     | Estación de servicio                              |
 | consumptionL100km | BigDecimal | Consumo calculado (nulo si no hay lleno anterior) |
-| createdAt | Instant | Fecha de registro |
+| createdAt         | Instant    | Fecha de registro                                 |
 
 #### Enums — ms-fuel
 
@@ -1211,13 +1249,13 @@ Detecta situaciones que requieren atención y las convierte en alertas: mantenim
 
 ### Reglas de evaluación
 
-| Tipo de alerta | Condición | Severidad por defecto | Parámetros |
-| --- | --- | --- | --- |
-| MAINTENANCE_DUE | Orden `PENDING` con `scheduledFor` entre hoy y los próximos `daysBefore` días | WARNING | daysBefore: 7 |
-| MAINTENANCE_OVERDUE | Orden `PENDING` con `scheduledFor` anterior a hoy | CRITICAL | — |
-| LICENSE_EXPIRING | Licencia que caduca en `daysBefore` días o menos | WARNING | daysBefore: 30 |
-| LICENSE_EXPIRED | Licencia con fecha de caducidad anterior a hoy | CRITICAL | — |
-| HIGH_CONSUMPTION | Consumo medio de los últimos 30 días superior en `thresholdPercent` % al de los 60 días anteriores | WARNING | thresholdPercent: 25 |
+| Tipo de alerta      | Condición                                                                                          | Severidad por defecto | Parámetros           |
+| ------------------- | -------------------------------------------------------------------------------------------------- | --------------------- | -------------------- |
+| MAINTENANCE_DUE     | Orden `PENDING` con `scheduledFor` entre hoy y los próximos `daysBefore` días                      | WARNING               | daysBefore: 7        |
+| MAINTENANCE_OVERDUE | Orden `PENDING` con `scheduledFor` anterior a hoy                                                  | CRITICAL              | —                    |
+| LICENSE_EXPIRING    | Licencia que caduca en `daysBefore` días o menos                                                   | WARNING               | daysBefore: 30       |
+| LICENSE_EXPIRED     | Licencia con fecha de caducidad anterior a hoy                                                     | CRITICAL              | —                    |
+| HIGH_CONSUMPTION    | Consumo medio de los últimos 30 días superior en `thresholdPercent` % al de los 60 días anteriores | WARNING               | thresholdPercent: 25 |
 
 **Funcionamiento del evaluador:**
 
@@ -1301,11 +1339,36 @@ Detecta situaciones que requieren atención y las convierte en alertas: mantenim
 
 ```json
 [
-  { "type": "MAINTENANCE_DUE", "enabled": true, "severity": "WARNING", "params": { "daysBefore": 7 } },
-  { "type": "MAINTENANCE_OVERDUE", "enabled": true, "severity": "CRITICAL", "params": {} },
-  { "type": "LICENSE_EXPIRING", "enabled": true, "severity": "WARNING", "params": { "daysBefore": 30 } },
-  { "type": "LICENSE_EXPIRED", "enabled": true, "severity": "CRITICAL", "params": {} },
-  { "type": "HIGH_CONSUMPTION", "enabled": true, "severity": "WARNING", "params": { "thresholdPercent": 25 } }
+  {
+    "type": "MAINTENANCE_DUE",
+    "enabled": true,
+    "severity": "WARNING",
+    "params": { "daysBefore": 7 }
+  },
+  {
+    "type": "MAINTENANCE_OVERDUE",
+    "enabled": true,
+    "severity": "CRITICAL",
+    "params": {}
+  },
+  {
+    "type": "LICENSE_EXPIRING",
+    "enabled": true,
+    "severity": "WARNING",
+    "params": { "daysBefore": 30 }
+  },
+  {
+    "type": "LICENSE_EXPIRED",
+    "enabled": true,
+    "severity": "CRITICAL",
+    "params": {}
+  },
+  {
+    "type": "HIGH_CONSUMPTION",
+    "enabled": true,
+    "severity": "WARNING",
+    "params": { "thresholdPercent": 25 }
+  }
 ]
 ```
 
@@ -1365,9 +1428,21 @@ Detecta situaciones que requieren atención y las convierte en alertas: mantenim
   "granularity": "WEEK",
   "totals": { "created": 11 },
   "series": [
-    { "period": "2026-09-07", "created": 3, "bySeverity": { "INFO": 0, "WARNING": 2, "CRITICAL": 1 } },
-    { "period": "2026-09-14", "created": 5, "bySeverity": { "INFO": 0, "WARNING": 3, "CRITICAL": 2 } },
-    { "period": "2026-09-21", "created": 3, "bySeverity": { "INFO": 0, "WARNING": 2, "CRITICAL": 1 } }
+    {
+      "period": "2026-09-07",
+      "created": 3,
+      "bySeverity": { "INFO": 0, "WARNING": 2, "CRITICAL": 1 }
+    },
+    {
+      "period": "2026-09-14",
+      "created": 5,
+      "bySeverity": { "INFO": 0, "WARNING": 3, "CRITICAL": 2 }
+    },
+    {
+      "period": "2026-09-21",
+      "created": 3,
+      "bySeverity": { "INFO": 0, "WARNING": 2, "CRITICAL": 1 }
+    }
   ],
   "open": { "INFO": 0, "WARNING": 9, "CRITICAL": 2 }
 }
@@ -1377,31 +1452,31 @@ Detecta situaciones que requieren atención y las convierte en alertas: mantenim
 
 #### Alert
 
-| Campo | Tipo | Descripción |
-| --- | --- | --- |
-| id | UUID | Identificador único |
-| type | Enum | Tipo de alerta |
-| severity | Enum | Severidad |
-| status | Enum | Estado de la alerta |
-| vehicleId | UUID | Vehículo afectado (opcional) |
-| driverId | UUID | Conductor afectado (opcional) |
-| message | String | Mensaje legible |
-| dedupKey | String | Clave única de la condición que la originó |
-| createdAt | Instant | Fecha de creación |
-| acknowledgedAt | Instant | Fecha de reconocimiento |
-| acknowledgedBy | UUID | Usuario que la reconoció |
-| comment | String | Comentario del reconocimiento |
-| resolvedAt | Instant | Fecha de resolución |
+| Campo          | Tipo    | Descripción                                |
+| -------------- | ------- | ------------------------------------------ |
+| id             | UUID    | Identificador único                        |
+| type           | Enum    | Tipo de alerta                             |
+| severity       | Enum    | Severidad                                  |
+| status         | Enum    | Estado de la alerta                        |
+| vehicleId      | UUID    | Vehículo afectado (opcional)               |
+| driverId       | UUID    | Conductor afectado (opcional)              |
+| message        | String  | Mensaje legible                            |
+| dedupKey       | String  | Clave única de la condición que la originó |
+| createdAt      | Instant | Fecha de creación                          |
+| acknowledgedAt | Instant | Fecha de reconocimiento                    |
+| acknowledgedBy | UUID    | Usuario que la reconoció                   |
+| comment        | String  | Comentario del reconocimiento              |
+| resolvedAt     | Instant | Fecha de resolución                        |
 
 #### AlertRule
 
-| Campo | Tipo | Descripción |
-| --- | --- | --- |
-| type | Enum | Tipo de alerta a la que aplica (clave primaria) |
-| enabled | Boolean | Indica si la regla está activa |
-| severity | Enum | Severidad que se asigna a las alertas |
-| params | JSON | Parámetros de la regla |
-| updatedAt | Instant | Fecha de la última modificación |
+| Campo     | Tipo    | Descripción                                     |
+| --------- | ------- | ----------------------------------------------- |
+| type      | Enum    | Tipo de alerta a la que aplica (clave primaria) |
+| enabled   | Boolean | Indica si la regla está activa                  |
+| severity  | Enum    | Severidad que se asigna a las alertas           |
+| params    | JSON    | Parámetros de la regla                          |
+| updatedAt | Instant | Fecha de la última modificación                 |
 
 #### Enums — ms-alerts
 
@@ -1505,7 +1580,7 @@ Origen de cada bloque: `fleet` de ms-vehicles, `kpis` de las estadísticas de ms
       "unit": "EUR",
       "points": [
         { "period": "2026-09-07", "value": 1595.21 },
-        { "period": "2026-09-14", "value": 1746.20 },
+        { "period": "2026-09-14", "value": 1746.2 },
         { "period": "2026-09-21", "value": 1664.39 }
       ]
     }
@@ -1535,9 +1610,27 @@ Origen de cada bloque: `fleet` de ms-vehicles, `kpis` de las estadísticas de ms
   "unit": "L/100 km",
   "period": { "from": "2026-09-05", "to": "2026-10-05" },
   "ranking": [
-    { "rank": 1, "vehicleId": "6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a03", "plate": "9012-PQR", "type": "TRUCK", "value": 27.5 },
-    { "rank": 2, "vehicleId": "6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a04", "plate": "1188-BCD", "type": "TRUCK", "value": 26.8 },
-    { "rank": 3, "vehicleId": "6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01", "plate": "4821-KDF", "type": "VAN", "value": 10.9 }
+    {
+      "rank": 1,
+      "vehicleId": "6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a03",
+      "plate": "9012-PQR",
+      "type": "TRUCK",
+      "value": 27.5
+    },
+    {
+      "rank": 2,
+      "vehicleId": "6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a04",
+      "plate": "1188-BCD",
+      "type": "TRUCK",
+      "value": 26.8
+    },
+    {
+      "rank": 3,
+      "vehicleId": "6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01",
+      "plate": "4821-KDF",
+      "type": "VAN",
+      "value": 10.9
+    }
   ]
 }
 ```
@@ -1561,30 +1654,30 @@ La comunicación es síncrona por HTTP con OpenFeign. Cada servicio de dominio v
 
 Las llamadas solo van hacia abajo, así que no hay dependencias circulares.
 
-| Servicio que llama | Servicios a los que llama |
-| --- | --- |
-| ms-gateway | Todos (enrutamiento) |
-| ms-dashboard | ms-vehicles, ms-routes, ms-fuel, ms-maintenance, ms-alerts |
-| ms-alerts | ms-maintenance, ms-fuel, ms-drivers, ms-vehicles |
-| ms-routes | ms-vehicles, ms-drivers |
-| ms-maintenance | ms-vehicles |
-| ms-fuel | ms-vehicles |
-| ms-auth, ms-vehicles, ms-drivers | — |
+| Servicio que llama               | Servicios a los que llama                                  |
+| -------------------------------- | ---------------------------------------------------------- |
+| ms-gateway                       | Todos (enrutamiento)                                       |
+| ms-dashboard                     | ms-vehicles, ms-routes, ms-fuel, ms-maintenance, ms-alerts |
+| ms-alerts                        | ms-maintenance, ms-fuel, ms-drivers, ms-vehicles           |
+| ms-routes                        | ms-vehicles, ms-drivers                                    |
+| ms-maintenance                   | ms-vehicles                                                |
+| ms-fuel                          | ms-vehicles                                                |
+| ms-auth, ms-vehicles, ms-drivers | —                                                          |
 
 ### Llamadas entre servicios
 
-| Acción | Servicio que la inicia | Llamadas que desencadena |
-| --- | --- | --- |
-| Planificar una ruta | ms-routes | ms-vehicles: consultar el vehículo. ms-drivers: consultar el conductor |
-| Iniciar una ruta | ms-routes | ms-vehicles: consultar el vehículo y cambiarlo a `IN_USE` |
-| Completar una ruta | ms-routes | ms-vehicles: cambiarlo a `AVAILABLE` y actualizar el odómetro |
-| Registrar un repostaje | ms-fuel | ms-vehicles: consultar el tipo de combustible y la capacidad del depósito |
-| Crear un plan de mantenimiento | ms-maintenance | ms-vehicles: comprobar que existe y leer el odómetro |
-| Iniciar una orden de mantenimiento | ms-maintenance | ms-vehicles: cambiarlo a `IN_MAINTENANCE` |
-| Completar una orden de mantenimiento | ms-maintenance | ms-vehicles: cambiarlo a `AVAILABLE` y actualizar el odómetro |
-| Tarea diaria de mantenimiento | ms-maintenance | ms-vehicles: leer el odómetro de cada vehículo con plan |
-| Evaluación de alertas | ms-alerts | ms-maintenance: órdenes pendientes. ms-drivers: licencias. ms-fuel: consumo. ms-vehicles: placas |
-| Consulta del dashboard | ms-dashboard | ms-vehicles, ms-routes, ms-fuel, ms-maintenance y ms-alerts: resúmenes y estadísticas |
+| Acción                               | Servicio que la inicia | Llamadas que desencadena                                                                         |
+| ------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------ |
+| Planificar una ruta                  | ms-routes              | ms-vehicles: consultar el vehículo. ms-drivers: consultar el conductor                           |
+| Iniciar una ruta                     | ms-routes              | ms-vehicles: consultar el vehículo y cambiarlo a `IN_USE`                                        |
+| Completar una ruta                   | ms-routes              | ms-vehicles: cambiarlo a `AVAILABLE` y actualizar el odómetro                                    |
+| Registrar un repostaje               | ms-fuel                | ms-vehicles: consultar el tipo de combustible y la capacidad del depósito                        |
+| Crear un plan de mantenimiento       | ms-maintenance         | ms-vehicles: comprobar que existe y leer el odómetro                                             |
+| Iniciar una orden de mantenimiento   | ms-maintenance         | ms-vehicles: cambiarlo a `IN_MAINTENANCE`                                                        |
+| Completar una orden de mantenimiento | ms-maintenance         | ms-vehicles: cambiarlo a `AVAILABLE` y actualizar el odómetro                                    |
+| Tarea diaria de mantenimiento        | ms-maintenance         | ms-vehicles: leer el odómetro de cada vehículo con plan                                          |
+| Evaluación de alertas                | ms-alerts              | ms-maintenance: órdenes pendientes. ms-drivers: licencias. ms-fuel: consumo. ms-vehicles: placas |
+| Consulta del dashboard               | ms-dashboard           | ms-vehicles, ms-routes, ms-fuel, ms-maintenance y ms-alerts: resúmenes y estadísticas            |
 
 ### Clientes Feign
 
@@ -1643,24 +1736,22 @@ Todos los servicios devuelven los errores con esta estructura:
 {
   "error": "VALIDATION_ERROR",
   "message": "La petición contiene campos no válidos",
-  "details": [
-    { "field": "year", "reason": "debe estar entre 1990 y 2027" }
-  ],
+  "details": [{ "field": "year", "reason": "debe estar entre 1990 y 2027" }],
   "timestamp": "2026-10-05T10:30:00Z"
 }
 ```
 
 `details` solo aparece en `VALIDATION_ERROR`. En `SERVICE_UNAVAILABLE` se añade el campo `service` con el nombre del servicio que no responde.
 
-| HTTP | Código | Cuándo |
-| --- | --- | --- |
-| 400 | VALIDATION_ERROR | Algún campo no cumple las validaciones |
-| 401 | UNAUTHORIZED, TOKEN_EXPIRED | Falta el token, no es válido o ha caducado |
-| 403 | FORBIDDEN | El rol del usuario no tiene permiso |
-| 404 | VEHICLE_NOT_FOUND, DRIVER_NOT_FOUND, ROUTE_NOT_FOUND, ORDER_NOT_FOUND, ALERT_NOT_FOUND, RULE_NOT_FOUND | El recurso no existe |
-| 409 | Códigos de negocio de cada servicio | La operación entra en conflicto con el estado actual |
-| 429 | RATE_LIMIT_EXCEEDED | Se supera el límite del gateway |
-| 503 | SERVICE_UNAVAILABLE | Una dependencia no responde |
+| HTTP | Código                                                                                                 | Cuándo                                               |
+| ---- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| 400  | VALIDATION_ERROR                                                                                       | Algún campo no cumple las validaciones               |
+| 401  | UNAUTHORIZED, TOKEN_EXPIRED                                                                            | Falta el token, no es válido o ha caducado           |
+| 403  | FORBIDDEN                                                                                              | El rol del usuario no tiene permiso                  |
+| 404  | VEHICLE_NOT_FOUND, DRIVER_NOT_FOUND, ROUTE_NOT_FOUND, ORDER_NOT_FOUND, ALERT_NOT_FOUND, RULE_NOT_FOUND | El recurso no existe                                 |
+| 409  | Códigos de negocio de cada servicio                                                                    | La operación entra en conflicto con el estado actual |
+| 429  | RATE_LIMIT_EXCEEDED                                                                                    | Se supera el límite del gateway                      |
+| 503  | SERVICE_UNAVAILABLE                                                                                    | Una dependencia no responde                          |
 
 ## Convenciones comunes
 
@@ -1899,32 +1990,32 @@ La épica EP-01 se divide en 22 historias de usuario que suman 88 puntos de hist
 
 ### Backlog del sprint
 
-| ID | Historia | Servicio | Puntos | Prioridad | Semana | Depende de |
-| --- | --- | --- | --- | --- | --- | --- |
-| US-01 | Infraestructura base y Docker Compose | Todos | 5 | Must | 1 | — |
-| US-02 | Registro e inicio de sesión | ms-auth | 3 | Must | 1 | US-01 |
-| US-03 | Validación de JWT, roles y clave interna | Todos | 5 | Must | 1 | US-02 |
-| US-04 | Gateway: enrutamiento y health | ms-gateway | 3 | Must | 1 | US-01 |
-| US-05 | Gateway: rate limiting | ms-gateway | 2 | Should | 1 | US-04 |
-| US-06 | Alta, consulta y edición de vehículos | ms-vehicles | 3 | Must | 1 | US-03 |
-| US-07 | Estado y odómetro de vehículos | ms-vehicles | 3 | Must | 1 | US-06 |
-| US-08 | Gestión de conductores | ms-drivers | 3 | Must | 1 | US-03 |
-| US-09 | Planificación de rutas | ms-routes | 5 | Must | 1 | US-07, US-08 |
-| US-10 | Inicio y finalización de rutas | ms-routes | 5 | Must | 2 | US-09 |
-| US-11 | Repostajes y consumo | ms-fuel | 5 | Must | 1 | US-06 |
-| US-12 | Planes de mantenimiento programado | ms-maintenance | 3 | Must | 1 | US-06 |
-| US-13 | Órdenes de mantenimiento: generación y ejecución | ms-maintenance | 5 | Must | 2 | US-07, US-12 |
-| US-14 | Evaluador de alertas | ms-alerts | 8 | Must | 2 | US-08, US-11, US-13 |
-| US-15 | Gestión y configuración de alertas | ms-alerts | 2 | Should | 2 | US-14 |
-| US-16 | Generador de datos demo | Servicios de dominio | 5 | Must | 2 | US-09, US-11, US-12 |
-| US-17 | Endpoints de estadísticas | ms-routes, ms-fuel, ms-maintenance, ms-alerts | 5 | Must | 2 | US-10, US-13, US-14 |
-| US-18 | Dashboard: resumen de flota | ms-dashboard, ms-vehicles | 5 | Must | 2 | US-17 |
-| US-19 | Dashboard: series temporales y ranking | ms-dashboard | 3 | Should | 2 | US-17 |
-| US-20 | Resiliencia en llamadas entre servicios | Todos | 3 | Should | 2 | US-10 |
-| US-21 | Pruebas y colección Postman del flujo completo | Todos | 5 | Should | 2 | US-18 |
-| US-22 | Documentación y README | Todos | 2 | Should | 2 | — |
-| US-23 | Notificación de alertas críticas por webhook | ms-alerts | 3 | Could | — | US-14 |
-| US-24 | Exportación de repostajes y rutas a CSV | ms-fuel, ms-routes | 2 | Could | — | US-10, US-11 |
+| ID    | Historia                                         | Servicio                                      | Puntos | Prioridad | Semana | Depende de          |
+| ----- | ------------------------------------------------ | --------------------------------------------- | ------ | --------- | ------ | ------------------- |
+| US-01 | Infraestructura base y Docker Compose            | Todos                                         | 5      | Must      | 1      | —                   |
+| US-02 | Registro e inicio de sesión                      | ms-auth                                       | 3      | Must      | 1      | US-01               |
+| US-03 | Validación de JWT, roles y clave interna         | Todos                                         | 5      | Must      | 1      | US-02               |
+| US-04 | Gateway: enrutamiento y health                   | ms-gateway                                    | 3      | Must      | 1      | US-01               |
+| US-05 | Gateway: rate limiting                           | ms-gateway                                    | 2      | Should    | 1      | US-04               |
+| US-06 | Alta, consulta y edición de vehículos            | ms-vehicles                                   | 3      | Must      | 1      | US-03               |
+| US-07 | Estado y odómetro de vehículos                   | ms-vehicles                                   | 3      | Must      | 1      | US-06               |
+| US-08 | Gestión de conductores                           | ms-drivers                                    | 3      | Must      | 1      | US-03               |
+| US-09 | Planificación de rutas                           | ms-routes                                     | 5      | Must      | 1      | US-07, US-08        |
+| US-10 | Inicio y finalización de rutas                   | ms-routes                                     | 5      | Must      | 2      | US-09               |
+| US-11 | Repostajes y consumo                             | ms-fuel                                       | 5      | Must      | 1      | US-06               |
+| US-12 | Planes de mantenimiento programado               | ms-maintenance                                | 3      | Must      | 1      | US-06               |
+| US-13 | Órdenes de mantenimiento: generación y ejecución | ms-maintenance                                | 5      | Must      | 2      | US-07, US-12        |
+| US-14 | Evaluador de alertas                             | ms-alerts                                     | 8      | Must      | 2      | US-08, US-11, US-13 |
+| US-15 | Gestión y configuración de alertas               | ms-alerts                                     | 2      | Should    | 2      | US-14               |
+| US-16 | Generador de datos demo                          | Servicios de dominio                          | 5      | Must      | 2      | US-09, US-11, US-12 |
+| US-17 | Endpoints de estadísticas                        | ms-routes, ms-fuel, ms-maintenance, ms-alerts | 5      | Must      | 2      | US-10, US-13, US-14 |
+| US-18 | Dashboard: resumen de flota                      | ms-dashboard, ms-vehicles                     | 5      | Must      | 2      | US-17               |
+| US-19 | Dashboard: series temporales y ranking           | ms-dashboard                                  | 3      | Should    | 2      | US-17               |
+| US-20 | Resiliencia en llamadas entre servicios          | Todos                                         | 3      | Should    | 2      | US-10               |
+| US-21 | Pruebas y colección Postman del flujo completo   | Todos                                         | 5      | Should    | 2      | US-18               |
+| US-22 | Documentación y README                           | Todos                                         | 2      | Should    | 2      | —                   |
+| US-23 | Notificación de alertas críticas por webhook     | ms-alerts                                     | 3      | Could     | —      | US-14               |
+| US-24 | Exportación de repostajes y rutas a CSV          | ms-fuel, ms-routes                            | 2      | Could     | —      | US-10, US-11        |
 
 ### Historias de usuario
 
@@ -2246,30 +2337,30 @@ Como gestor, quiero exportar repostajes y rutas a CSV, para analizarlos en una h
 
 ## Plan del sprint
 
-| Semana | Días | Historias | Puntos | Hito de integración |
-| --- | --- | --- | --- | --- |
-| 1 | D1–D5 | US-01 a US-09, US-11 y US-12 | 40 | D5: el flujo registro, login, alta de vehículo y conductor y ruta planificada funciona a través del gateway |
-| 2 | D6–D10 | US-10 y US-13 a US-22 | 48 | D8: alertas y datos demo. D9: dashboard con series. D10: revisión y retrospectiva |
+| Semana | Días   | Historias                    | Puntos | Hito de integración                                                                                         |
+| ------ | ------ | ---------------------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
+| 1      | D1–D5  | US-01 a US-09, US-11 y US-12 | 40     | D5: el flujo registro, login, alta de vehículo y conductor y ruta planificada funciona a través del gateway |
+| 2      | D6–D10 | US-10 y US-13 a US-22        | 48     | D8: alertas y datos demo. D9: dashboard con series. D10: revisión y retrospectiva                           |
 
 ### Línea de tiempo del sprint
 
-| Días | Trabajo previsto |
-| --- | --- |
-| D1–D2 | US-01, US-02, US-03, US-04 (base, auth, gateway) |
-| D3–D5 | US-05 a US-09, US-11, US-12 (vehículos, conductores, rutas, combustible, planes) |
-| D6–D8 | US-10, US-13, US-14, US-15, US-16 (rutas en curso, órdenes, alertas, datos demo) |
-| D9 | US-17, US-18, US-19 (estadísticas y dashboard) |
+| Días   | Trabajo previsto                                                                    |
+| ------ | ----------------------------------------------------------------------------------- |
+| D1–D2  | US-01, US-02, US-03, US-04 (base, auth, gateway)                                    |
+| D3–D5  | US-05 a US-09, US-11, US-12 (vehículos, conductores, rutas, combustible, planes)    |
+| D6–D8  | US-10, US-13, US-14, US-15, US-16 (rutas en curso, órdenes, alertas, datos demo)    |
+| D9     | US-17, US-18, US-19 (estadísticas y dashboard)                                      |
 | D9–D10 | US-20, US-21, US-22 (resiliencia, pruebas, documentación), revisión y retrospectiva |
 
 ### Ceremonias
 
-| Ceremonia | Cuándo | Duración | Objetivo |
-| --- | --- | --- | --- |
-| Sprint Planning | D1 | 2 h | Acordar el objetivo del sprint y el compromiso con las historias Must |
-| Daily Scrum | Cada día | 15 min | Avance, plan del día y bloqueos |
-| Refinamiento | D6 | 1 h | Revisar los criterios de aceptación de las historias de la semana 2 |
-| Sprint Review | D10 | 1 h | Demostrar el flujo completo con los datos demo |
-| Retrospectiva | D10 | 1 h | Acordar mejoras para el siguiente sprint |
+| Ceremonia       | Cuándo   | Duración | Objetivo                                                              |
+| --------------- | -------- | -------- | --------------------------------------------------------------------- |
+| Sprint Planning | D1       | 2 h      | Acordar el objetivo del sprint y el compromiso con las historias Must |
+| Daily Scrum     | Cada día | 15 min   | Avance, plan del día y bloqueos                                       |
+| Refinamiento    | D6       | 1 h      | Revisar los criterios de aceptación de las historias de la semana 2   |
+| Sprint Review   | D10      | 1 h      | Demostrar el flujo completo con los datos demo                        |
+| Retrospectiva   | D10      | 1 h      | Acordar mejoras para el siguiente sprint                              |
 
 ### Definición de Ready
 
@@ -2293,9 +2384,9 @@ Una historia está terminada cuando:
 
 ### Riesgos
 
-| Riesgo | Mitigación |
-| --- | --- |
-| ms-vehicles bloquea a ms-routes, ms-maintenance y ms-fuel si se retrasa tanto | Terminar US-06 y US-07 entre D1 y D3 y usar un stub con datos fijos mientras |
-| La integración entre servicios llega tarde | Hito de integración en D5 y colección Postman desde esa fecha |
-| El generador de datos demo (US-16) es más largo de lo previsto | Empezar por vehículos, conductores y repostajes, y dejar rutas y mantenimiento para el final |
-| Las tareas programadas son difíciles de probar | Intervalo configurable y endpoint `POST /api/alerts/evaluate` para lanzarlas a demanda |
+| Riesgo                                                                        | Mitigación                                                                                   |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| ms-vehicles bloquea a ms-routes, ms-maintenance y ms-fuel si se retrasa tanto | Terminar US-06 y US-07 entre D1 y D3 y usar un stub con datos fijos mientras                 |
+| La integración entre servicios llega tarde                                    | Hito de integración en D5 y colección Postman desde esa fecha                                |
+| El generador de datos demo (US-16) es más largo de lo previsto                | Empezar por vehículos, conductores y repostajes, y dejar rutas y mantenimiento para el final |
+| Las tareas programadas son difíciles de probar                                | Intervalo configurable y endpoint `POST /api/alerts/evaluate` para lanzarlas a demanda       |

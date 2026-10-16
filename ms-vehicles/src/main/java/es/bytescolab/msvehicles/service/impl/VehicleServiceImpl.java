@@ -3,6 +3,7 @@ package es.bytescolab.msvehicles.service.impl;
 import es.bytescolab.msvehicles.dto.request.CreateVehicleRequest;
 import es.bytescolab.msvehicles.dto.request.StatusVehicleRequest;
 import es.bytescolab.msvehicles.dto.request.UpdateVehicleRequest;
+import es.bytescolab.msvehicles.dto.response.FleetSummaryResponse;
 import es.bytescolab.msvehicles.dto.response.PageResponse;
 import es.bytescolab.msvehicles.dto.response.VehicleDetailsResponse;
 import es.bytescolab.msvehicles.dto.response.VehicleSummaryResponse;
@@ -22,6 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -133,6 +136,21 @@ public class VehicleServiceImpl implements VehicleService {
                     "Ya existe un vehículo con la placa: " + request.plate()
             );
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public FleetSummaryResponse getFleetSummary() {
+        long total = vehicleRepository.count();
+        Map<VehicleStatus, Long> porEstado = new EnumMap<>(VehicleStatus.class);
+        for (VehicleStatus estado : VehicleStatus.values()) {
+            porEstado.put(estado, vehicleRepository.countByStatus(estado));
+        }
+        Map<VehicleType, Long> porTipo = new EnumMap<>(VehicleType.class);
+        for (VehicleType tipo : VehicleType.values()) {
+            porTipo.put(tipo, vehicleRepository.countByType(tipo));
+        }
+        return new FleetSummaryResponse(total, porEstado, porTipo);
     }
 
     private boolean isAdmin() {
