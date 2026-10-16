@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,33 +47,54 @@ class AlertPersistenceHelperTest {
     }
 
     @Test
-    void reaparicionTrasResolved_insertaNuevaAlerta() {
+    void reaparicionTrasResolved_reabreLaMismaAlerta() {
+        UUID existingId = UUID.randomUUID();
+        AlertEntity resolved = AlertEntity.builder()
+                .id(existingId)
+                .type(AlertType.MAINTENANCE_OVERDUE)
+                .severity(AlertSeverity.CRITICAL)
+                .status(AlertStatus.RESOLVED)
+                .dedupKey("MAINTENANCE_OVERDUE:order-1")
+                .message("Mensaje de prueba")
+                .createdAt(FIXED_NOW.minusSeconds(3600))
+                .resolvedAt(FIXED_NOW.minusSeconds(60))
+                .acknowledgedAt(FIXED_NOW.minusSeconds(120))
+                .acknowledgedBy(UUID.randomUUID())
+                .comment("revisado")
+                .build();
         AlertCandidate candidate = candidateWithDedupKey("MAINTENANCE_OVERDUE:order-1");
-        when(alertRepository.findActiveByDedupKeys(anyCollection())).thenReturn(List.of());
+        when(alertRepository.findByDedupKeys(anyCollection())).thenReturn(List.of(resolved));
         when(alertRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
         AlertPersistenceHelper.PersistenceResult result =
-                persistenceHelper.apply(List.of(candidate));
+                persistenceHelper.apply(List.of(candidate), Set.of(AlertType.MAINTENANCE_OVERDUE));
+
+        assertThat(result.created()).isZero();
+        assertThat(result.reopened()).isEqualTo(1);
+        assertThat(result.createdAlerts()).isEmpty();
+        assertThat(result.reopenedAlerts()).hasSize(1);
+        assertThat(result.reopenedAlerts().get(0).getId()).isEqualTo(existingId);
 
         ArgumentCaptor<List<AlertEntity>> saved = ArgumentCaptor.forClass(List.class);
         verify(alertRepository).saveAll(saved.capture());
-        assertThat(result.created()).isEqualTo(1);
-        assertThat(result.createdAlerts()).hasSize(1);
-        assertThat(result.createdAlerts().get(0).getDedupKey()).isEqualTo("MAINTENANCE_OVERDUE:order-1");
-        assertThat(saved.getValue()).hasSize(1);
-        assertThat(saved.getValue().get(0).getDedupKey()).isEqualTo("MAINTENANCE_OVERDUE:order-1");
-        assertThat(saved.getValue().get(0).getStatus()).isEqualTo(AlertStatus.OPEN);
+        AlertEntity savedAlert = saved.getValue().get(0);
+        assertThat(savedAlert.getId()).isEqualTo(existingId);
+        assertThat(savedAlert.getStatus()).isEqualTo(AlertStatus.OPEN);
+        assertThat(savedAlert.getResolvedAt()).isNull();
+        assertThat(savedAlert.getAcknowledgedAt()).isNull();
+        assertThat(savedAlert.getAcknowledgedBy()).isNull();
+        assertThat(savedAlert.getComment()).isNull();
     }
 
     @Test
     void duplicadoEnMismaRonda_insertaUnaSolaVez() {
         AlertCandidate first = candidateWithDedupKey("MAINTENANCE_DUE:order-2");
         AlertCandidate second = candidateWithDedupKey("MAINTENANCE_DUE:order-2");
-        when(alertRepository.findActiveByDedupKeys(anyCollection())).thenReturn(List.of());
+        when(alertRepository.findByDedupKeys(anyCollection())).thenReturn(List.of());
         when(alertRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
         AlertPersistenceHelper.PersistenceResult result =
-                persistenceHelper.apply(List.of(first, second));
+                persistenceHelper.apply(List.of(first, second), Set.of(AlertType.MAINTENANCE_DUE));
 
         ArgumentCaptor<List<AlertEntity>> saved = ArgumentCaptor.forClass(List.class);
         verify(alertRepository).saveAll(saved.capture());
@@ -92,10 +114,11 @@ class AlertPersistenceHelperTest {
                 .message("Licencia caducada")
                 .createdAt(FIXED_NOW)
                 .build();
-        when(alertRepository.findActiveByDedupKeys(anyCollection())).thenReturn(List.of(active));
+        when(alertRepository.findByDedupKeys(anyCollection())).thenReturn(List.of(active));
+        when(alertRepository.findActive()).thenReturn(List.of(active));
 
         AlertPersistenceHelper.PersistenceResult result =
-                persistenceHelper.apply(List.of(candidate));
+                persistenceHelper.apply(List.of(candidate), Set.of(AlertType.LICENSE_EXPIRED));
 
         assertThat(result.created()).isZero();
         assertThat(result.createdAlerts()).isEmpty();
@@ -114,11 +137,12 @@ class AlertPersistenceHelperTest {
                 .createdAt(FIXED_NOW)
                 .build();
         AlertCandidate other = candidateWithDedupKey("MAINTENANCE_DUE:order-10");
-        when(alertRepository.findActiveByDedupKeys(anyCollection())).thenReturn(List.of(active));
+        when(alertRepository.findByDedupKeys(anyCollection())).thenReturn(List.of());
+        when(alertRepository.findActive()).thenReturn(List.of(active));
         when(alertRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
         AlertPersistenceHelper.PersistenceResult result =
-                persistenceHelper.apply(List.of(other));
+                persistenceHelper.apply(List.of(other), Set.of(AlertType.MAINTENANCE_DUE));
 
         assertThat(result.resolved()).isEqualTo(1);
         assertThat(active.getStatus()).isEqualTo(AlertStatus.RESOLVED);

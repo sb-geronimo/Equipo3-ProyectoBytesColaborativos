@@ -66,7 +66,7 @@ public class AlertEntity implements Persistable<UUID> {
     @Column(name = "message", nullable = false, length = 1000)
     private String message;
 
-    @Column(name = "dedup_key", nullable = false, length = 255)
+    @Column(name = "dedup_key", nullable = false, unique = true, length = 255)
     private String dedupKey;
 
     @CreatedDate
