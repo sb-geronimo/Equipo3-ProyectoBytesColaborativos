@@ -6,9 +6,10 @@
 ![Build](https://img.shields.io/badge/Build-Maven-C71A36?logo=apachemaven&logoColor=white)
 ![Docker](https://img.shields.io/badge/Container-Docker-2496ED?logo=docker&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL_15-4169E1?logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Rate_Limiting-Redis_7-DC382D?logo=redis&logoColor=white)
 
 **Equipo:** Equipo 03  
-**Arquitectura:** Microservicios autónomos (API Gateway + 8 servicios, una base de datos por servicio)  
+**Arquitectura:** Microservicios  
 **Recurso externo:** Ninguno. Los datos de demostración los genera un seeder propio (Datafaker con semilla fija)
 
 ---
@@ -85,13 +86,13 @@ ms-auth, ms-vehicles, ms-drivers ──► (ninguna)
 |------------------|--------|
 | `ms-gateway`     | ✅     |
 | `ms-auth`        | ✅     |
-| `ms-vehicles`    | 🔧     |
+| `ms-vehicles`    | ✅     |
 | `ms-drivers`     | ✅     |
 | `ms-routes`      | ✅     |
 | `ms-maintenance` | ✅     |
 | `ms-fuel`        | ✅     |
 | `ms-alerts`      | ✅     |
-| `ms-dashboard`   | ⏳     |
+| `ms-dashboard`   | ✅     |
 
 > Leyenda: ⏳ Pendiente, 🔧 Parcial, ✅ Completo
 
@@ -131,19 +132,19 @@ Copiar `.env.example` a `.env` y completar los valores antes de levantar los ser
 cp .env.example .env
 ```
 
-| Variable                        | Descripción                                                                                                          | Ejemplo / por defecto                  |
-|---------------------------------|----------------------------------------------------------------------------------------------------------------------|----------------------------------------|
-| `POSTGRES_USER`                 | Usuario de PostgreSQL                                                                                                | `fleet`                                |
-| `POSTGRES_PASSWORD`             | Contraseña de PostgreSQL                                                                                             | —                                      |
-| `JWT_SECRET`                    | Clave secreta para firmar y validar JWT (HS256), compartida por los servicios. Mínimo 32 caracteres                  | —                                      |
-| `JWT_EXPIRATION`                | Validez del token en milisegundos (solo `ms-auth`)                                                                   | `3600000` (1 h)                        |
-| `INTERNAL_API_KEY`              | Clave interna para llamadas entre servicios (cabecera `X-Internal-Key`)                                              | —                                      |
-| `DEMO_ADMIN_PASSWORD`           | Contraseña del usuario `admin@fleetcontrol.com` creado por el seeder                                                 | —                                      |
-| `SPRING_PROFILES_ACTIVE`        | Perfil activo. Con `demo` se ejecutan los seeders                                                                    | `demo`                                 |
-| `DEMO_SEED`                     | Semilla del generador de datos                                                                                       | `42`                                   |
-| `DEMO_DAYS`                     | Días de histórico a generar                                                                                          | `90`                                   |
-| `RATE_LIMIT_PER_MINUTE`         | Peticiones por minuto y por IP en el gateway                                                                         | `60`                                   |
-| `WEBHOOK_URL`                   | URL del webhook al que ms-alerts envía cada alerta CRITICAL nueva (vacía = deshabilitado)                             | — (vacía)                              |
+| Variable                 | Descripción                                                                                         | Ejemplo / por defecto |
+|--------------------------|-----------------------------------------------------------------------------------------------------|-----------------------|
+| `POSTGRES_USER`          | Usuario de PostgreSQL                                                                               | `fleet`               |
+| `POSTGRES_PASSWORD`      | Contraseña de PostgreSQL                                                                            | —                     |
+| `JWT_SECRET`             | Clave secreta para firmar y validar JWT (HS256), compartida por los servicios. Mínimo 32 caracteres | —                     |
+| `JWT_EXPIRATION`         | Validez del token en milisegundos (solo `ms-auth`)                                                  | `3600000` (1 h)       |
+| `INTERNAL_API_KEY`       | Clave interna para llamadas entre servicios (cabecera `X-Internal-Key`)                             | —                     |
+| `DEMO_ADMIN_PASSWORD`    | Contraseña del usuario `admin@fleetcontrol.com` creado por el seeder                                | —                     |
+| `SPRING_PROFILES_ACTIVE` | Perfil activo. Con `demo` se ejecutan los seeders                                                   | `demo`                |
+| `DEMO_SEED`              | Semilla del generador de datos                                                                      | `42`                  |
+| `DEMO_DAYS`              | Días de histórico a generar                                                                         | `90`                  |
+| `RATE_LIMIT_PER_MINUTE`  | Peticiones por minuto y por IP en el gateway                                                        | `60`                  |
+| `WEBHOOK_URL`            | URL del webhook al que ms-alerts envía cada alerta CRITICAL nueva (vacía = deshabilitado)           | — (vacía)             |
 
 > **Generar `JWT_SECRET`:** `openssl rand -base64 32` (puede ejecutarse desde Git Bash).
 
@@ -222,58 +223,58 @@ Los endpoints "interno" también aceptan `X-Internal-Key`.
 
 ### Vehículos `🔒` — `ms-vehicles`
 
-| Método | Ruta                               | Descripción                                       |
-|--------|------------------------------------|---------------------------------------------------|
-| GET    | `/api/vehicles`                    | Lista paginada (`status`, `type`, `plate`)        |
-| GET    | `/api/vehicles/summary`            | Recuento por estado y por tipo                    |
-| GET    | `/api/vehicles/{vehicleId}`        | Detalle                                           |
-| POST   | `/api/vehicles`                    | Alta (nace `AVAILABLE`)                           |
-| PUT    | `/api/vehicles/{vehicleId}`        | Actualiza datos descriptivos                      |
-| PATCH  | `/api/vehicles/{vehicleId}/status` | Cambia estado y odómetro (transiciones validadas) |
+| Método | Ruta                               | Acceso         | Descripción                                       |
+|--------|------------------------------------|----------------|---------------------------------------------------|
+| GET    | `/api/vehicles`                    | MANAGER, ADMIN | Lista paginada (`status`, `type`, `plate`)        |
+| GET    | `/api/vehicles/summary`            | MANAGER, ADMIN | Recuento por estado y por tipo                    |
+| GET    | `/api/vehicles/{vehicleId}`        | MANAGER, ADMIN | Detalle                                           |
+| POST   | `/api/vehicles`                    | MANAGER, ADMIN | Alta (nace `AVAILABLE`)                           |
+| PUT    | `/api/vehicles/{vehicleId}`        | MANAGER, ADMIN | Actualiza datos descriptivos                      |
+| PATCH  | `/api/vehicles/{vehicleId}/status` | MANAGER, ADMIN | Cambia estado y odómetro (transiciones validadas) |
 
 ### Conductores `🔒` — `ms-drivers`
 
-| Método | Ruta                      | Descripción                                           |
-|--------|---------------------------|-------------------------------------------------------|
-| GET    | `/api/drivers`            | Lista paginada (`status`, `licenseExpiringInDays`)    |
-| GET    | `/api/drivers/{driverId}` | Detalle                                               |
-| POST   | `/api/drivers`            | Alta (nace `ACTIVE`)                                  |
-| PUT    | `/api/drivers/{driverId}` | Actualiza datos y estado, permite renovar la licencia |
+| Método | Ruta                      | Acceso         | Descripción                                           |
+|--------|---------------------------|----------------|-------------------------------------------------------|
+| GET    | `/api/drivers`            | MANAGER, ADMIN | Lista paginada (`status`, `licenseExpiringInDays`)    |
+| GET    | `/api/drivers/{driverId}` | MANAGER, ADMIN | Detalle                                               |
+| POST   | `/api/drivers`            | MANAGER, ADMIN | Alta (nace `ACTIVE`)                                  |
+| PUT    | `/api/drivers/{driverId}` | MANAGER, ADMIN | Actualiza datos y estado, permite renovar la licencia |
 
 ### Rutas `🔒` — `ms-routes`
 
-| Método | Ruta                             | Descripción                                                  |
-|--------|----------------------------------|--------------------------------------------------------------|
-| POST   | `/api/routes`                    | Planifica una ruta (vehículo + conductor)                    |
-| GET    | `/api/routes`                    | Lista paginada (`vehicle`, `driver`, `status`, `from`, `to`) |
-| GET    | `/api/routes/{routeId}`          | Detalle                                                      |
-| POST   | `/api/routes/{routeId}/start`    | Inicia la ruta, el vehículo pasa a `IN_USE`                  |
-| POST   | `/api/routes/{routeId}/complete` | Finaliza la ruta, actualiza el odómetro                      |
-| GET    | `/api/routes/stats`              | Serie temporal de rutas completadas                          |
-| GET    | `/api/routes/export`             | Exporta rutas a CSV (mismos filtros; máx. 10.000 filas)      |
+| Método | Ruta                             | Acceso         | Descripción                                                  |
+|--------|----------------------------------|----------------|--------------------------------------------------------------|
+| POST   | `/api/routes`                    | MANAGER, ADMIN | Planifica una ruta (vehículo + conductor)                    |
+| GET    | `/api/routes`                    | MANAGER, ADMIN | Lista paginada (`vehicle`, `driver`, `status`, `from`, `to`) |
+| GET    | `/api/routes/{routeId}`          | MANAGER, ADMIN | Detalle                                                      |
+| POST   | `/api/routes/{routeId}/start`    | MANAGER, ADMIN | Inicia la ruta, el vehículo pasa a `IN_USE`                  |
+| POST   | `/api/routes/{routeId}/complete` | MANAGER, ADMIN | Finaliza la ruta, actualiza el odómetro                      |
+| GET    | `/api/routes/stats`              | MANAGER, ADMIN | Serie temporal de rutas completadas                          |
+| GET    | `/api/routes/export`             | MANAGER, ADMIN | Exporta rutas a CSV (mismos filtros; máx. 10.000 filas)      |
 
 ### Mantenimiento `🔒` — `ms-maintenance`
 
-| Método | Ruta                                         | Descripción                                                                                             |
-|--------|----------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| POST   | `/api/maintenance/plans`                     | Crea un plan de mantenimiento                                                                           |
-| GET    | `/api/maintenance/plans`                     | Lista planes (`vehicle`, `type`, `active`)                                                              |
-| GET    | `/api/maintenance/orders`                    | Lista paginada, orden `scheduledFor` ASC (`vehicle`, `status`, `type`, `dueBefore`, `page`, `size`)     |
-| POST   | `/api/maintenance/orders/{orderId}/start`    | Inicia la orden `PENDING→IN_PROGRESS`, vehículo a `IN_MAINTENANCE`                                      |
-| POST   | `/api/maintenance/orders/{orderId}/complete` | Completa `IN_PROGRESS→COMPLETED`, vehículo a `AVAILABLE` con odómetro, recalcula `nextDueAt/nextDueKm`. |
-| GET    | `/api/maintenance/stats`                     | Serie temporal de órdenes y costes                                                                       |
+| Método | Ruta                                         | Acceso         | Descripción                                                                                             |
+|--------|----------------------------------------------|----------------|---------------------------------------------------------------------------------------------------------|
+| POST   | `/api/maintenance/plans`                     | MANAGER, ADMIN | Crea un plan de mantenimiento                                                                           |
+| GET    | `/api/maintenance/plans`                     | MANAGER, ADMIN | Lista planes (`vehicle`, `type`, `active`)                                                              |
+| GET    | `/api/maintenance/orders`                    | MANAGER, ADMIN | Lista paginada, orden `scheduledFor` ASC (`vehicle`, `status`, `type`, `dueBefore`, `page`, `size`)     |
+| POST   | `/api/maintenance/orders/{orderId}/start`    | MANAGER, ADMIN | Inicia la orden `PENDING→IN_PROGRESS`, vehículo a `IN_MAINTENANCE`                                      |
+| POST   | `/api/maintenance/orders/{orderId}/complete` | MANAGER, ADMIN | Completa `IN_PROGRESS→COMPLETED`, vehículo a `AVAILABLE` con odómetro, recalcula `nextDueAt/nextDueKm`. |
+| GET    | `/api/maintenance/stats`                     | MANAGER, ADMIN | Serie temporal de órdenes y costes                                                                      |
 
 > Tarea diaria `06:00 UTC`: crea `PENDING` si faltan ≤7 días o ≤500 km para el vencimiento, sin duplicar abiertas.
 
 ### Combustible `🔒` — `ms-fuel`
 
-| Método | Ruta                       | Descripción                                                  |
-|--------|----------------------------|--------------------------------------------------------------|
-| POST   | `/api/fuel/refuels`        | Registra un repostaje y calcula el consumo                   |
-| GET    | `/api/fuel/refuels`        | Lista paginada (`vehicle`, `from`, `to`)                     |
-| GET    | `/api/fuel/refuels/export` | Exporta repostajes a CSV (mismos filtros; máx. 10.000 filas) |
-| GET    | `/api/fuel/consumption`    | Consumo agregado por vehículo en un periodo                  |
-| GET    | `/api/fuel/stats`          | Serie temporal de litros, coste y consumo                    |
+| Método | Ruta                       | Acceso         | Descripción                                                  |
+|--------|----------------------------|----------------|--------------------------------------------------------------|
+| POST   | `/api/fuel/refuels`        | MANAGER, ADMIN | Registra un repostaje y calcula el consumo                   |
+| GET    | `/api/fuel/refuels`        | MANAGER, ADMIN | Lista paginada (`vehicle`, `from`, `to`)                     |
+| GET    | `/api/fuel/refuels/export` | MANAGER, ADMIN | Exporta repostajes a CSV (mismos filtros; máx. 10.000 filas) |
+| GET    | `/api/fuel/consumption`    | MANAGER, ADMIN | Consumo agregado por vehículo en un periodo                  |
+| GET    | `/api/fuel/stats`          | MANAGER, ADMIN | Serie temporal de litros, coste y consumo                    |
 
 ### Alertas `🔒` — `ms-alerts`
 
@@ -286,15 +287,16 @@ Los endpoints "interno" también aceptan `X-Internal-Key`.
 | POST   | `/api/alerts/evaluate`              | ADMIN          | Lanza una evaluación inmediata                           |
 | GET    | `/api/alerts/stats`                 | MANAGER, ADMIN | Serie temporal de alertas creadas                        |
 
-> US-23: con `WEBHOOK_URL` configurada, cada alerta `CRITICAL` nueva se envía en un POST con el JSON de la alerta (3 reintentos sin bloquear el evaluador); vacía = deshabilitado.
+> US-23: con `WEBHOOK_URL` configurada, cada alerta `CRITICAL` nueva se envía en un POST con el JSON de la alerta (3
+> reintentos sin bloquear el evaluador); vacía = deshabilitado.
 
 ### Dashboard `🔒` — `ms-dashboard`
 
-| Método | Ruta                              | Descripción                                                              |
-|--------|-----------------------------------|--------------------------------------------------------------------------|
-| GET    | `/api/dashboard`                  | Resumen de flota, KPIs, alertas y próximos mantenimientos (`days`)       |
-| GET    | `/api/dashboard/timeseries`       | Series de una o varias métricas (`metrics`, `from`, `to`, `granularity`) |
-| GET    | `/api/dashboard/vehicles/ranking` | Ranking por `FUEL_COST` o `CONSUMPTION` (`days`, `limit`, `type`)        |
+| Método | Ruta                              | Acceso         | Descripción                                                              |
+|--------|-----------------------------------|----------------|--------------------------------------------------------------------------|
+| GET    | `/api/dashboard`                  | MANAGER, ADMIN | Resumen de flota, KPIs, alertas y próximos mantenimientos (`days`)       |
+| GET    | `/api/dashboard/timeseries`       | MANAGER, ADMIN | Series de una o varias métricas (`metrics`, `from`, `to`, `granularity`) |
+| GET    | `/api/dashboard/vehicles/ranking` | MANAGER, ADMIN | Ranking por `FUEL_COST` o `CONSUMPTION` (`days`, `limit`, `type`)        |
 
 ### Series temporales (`/stats`)
 
@@ -303,6 +305,21 @@ Los servicios con datos fechados aceptan `from`, `to` y `granularity` (`DAY`, `W
 - `period` es la fecha de inicio del periodo: el propio día en `DAY`, el lunes en `WEEK` y el día 1 en `MONTH`.
 - Los periodos sin datos se devuelven con valor 0.
 - Todas las fechas se calculan en UTC.
+
+### Documentación interactiva (Swagger UI)
+
+Cada microservicio publica su propia Swagger UI (springdoc-openapi) con todos sus endpoints, ejemplos de
+petición/respuesta y los códigos de error posibles:
+
+- UI interactiva: `http://localhost:<puerto>/swagger-ui.html`
+- Especificación OpenAPI (JSON): `http://localhost:<puerto>/v3/api-docs`
+
+Los endpoints protegidos aparecen con el candado `🔒`. Para probarlos desde la propia UI:
+
+1. Obtener un token con `POST /api/auth/login` (o registrarse en `POST /api/auth/register`).
+2. Pulsar **Authorize** y pegar el token (Swagger UI añade el prefijo `Bearer ` automáticamente).
+3. Ejecutar la operación: cada una documenta sus parámetros de ejemplo y las respuestas posibles (`200`, `400`, `401`,
+   `403`, `404`, `409`, `503`).
 
 ---
 
@@ -391,11 +408,10 @@ Todos los servicios devuelven los errores con la misma estructura:
 
 ## Equipo
 
-| Integrante       | GitHub                                                   |
-|------------------|----------------------------------------------------------|
-| Beckan Geronimo  | [@Beckan](https://github.com/sb-geronimo)                |
-| Alberto Cruz     | [@alberto-cruz-mtz](https://github.com/alberto-cruz-mtz) |
-| {{Integrante 3}} | [@{{usuario}}](https://github.com/{{usuario}})           |
+| Integrante      | GitHub                                                   |
+|-----------------|----------------------------------------------------------|
+| Beckan Geronimo | [@Beckan](https://github.com/sb-geronimo)                |
+| Alberto Cruz    | [@alberto-cruz-mtz](https://github.com/alberto-cruz-mtz) |
 
 <br>
 
