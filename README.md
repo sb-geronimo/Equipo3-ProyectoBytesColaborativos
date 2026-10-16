@@ -27,17 +27,17 @@ dashboard con series temporales.
 
 ## Microservicios
 
-| Servicio         | Puerto | Base de datos            | Responsabilidad                                         |
-|------------------|--------|--------------------------|---------------------------------------------------------|
-| `ms-gateway`     | 8080   | — (Redis)                | Punto de entrada único, enrutamiento y rate limiting    |
-| `ms-auth`        | 8081   | `auth_db`                | Registro, login y emisión de tokens JWT                 |
-| `ms-vehicles`    | 8082   | `vehicles_db`            | Inventario de vehículos, estado y odómetro              |
-| `ms-drivers`     | 8083   | `drivers_db`             | Conductores, licencias y estado                         |
-| `ms-routes`      | 8085   | `routes_db`              | Planificación, ejecución e historial de rutas           |
-| `ms-maintenance` | 8086   | `maintenance_db`         | Planes de mantenimiento programado y órdenes de trabajo |
-| `ms-fuel`        | 8087   | `fuel_db`                | Repostajes y consumo de combustible                     |
-| `ms-alerts`      | 8088   | `alerts_db`              | Reglas y alertas de revisión, licencia y consumo        |
-| `ms-dashboard`   | 8089   | — (caché Caffeine, 60 s) | Resumen ejecutivo y series temporales agregadas         |
+| Servicio         | Puerto | Base de datos            | Responsabilidad                                         | Implementado |
+|------------------|--------|--------------------------|---------------------------------------------------------|--------------|
+| `ms-gateway`     | 8080   | — (Redis)                | Punto de entrada único, enrutamiento y rate limiting    | ✅           |
+| `ms-auth`        | 8081   | `auth_db`                | Registro, login y emisión de tokens JWT                 | ✅           |
+| `ms-vehicles`    | 8082   | `vehicles_db`            | Inventario de vehículos, estado y odómetro              | ✅           |
+| `ms-drivers`     | 8083   | `drivers_db`             | Conductores, licencias y estado                         | ✅           |
+| `ms-routes`      | 8085   | `routes_db`              | Planificación, ejecución e historial de rutas           | ✅           |
+| `ms-maintenance` | 8086   | `maintenance_db`         | Planes de mantenimiento programado y órdenes de trabajo | ✅           |
+| `ms-fuel`        | 8087   | `fuel_db`                | Repostajes y consumo de combustible                     | ✅           |
+| `ms-alerts`      | 8088   | `alerts_db`              | Reglas y alertas de revisión, licencia y consumo        | ✅           |
+| `ms-dashboard`   | 8089   | — (caché Caffeine, 60 s) | Resumen ejecutivo y series temporales agregadas         | ✅           |
 
 Las 7 bases de datos viven en una única instancia de PostgreSQL durante el desarrollo. El gateway usa además una
 instancia de Redis 7 para el rate limiting.
@@ -77,24 +77,6 @@ ms-maintenance ──► ms-vehicles
 ms-fuel        ──► ms-vehicles
 ms-auth, ms-vehicles, ms-drivers ──► (ninguna)
 ```
-
----
-
-## Estado de implementación
-
-| Servicio         | Estado |
-|------------------|--------|
-| `ms-gateway`     | ✅     |
-| `ms-auth`        | ✅     |
-| `ms-vehicles`    | ✅     |
-| `ms-drivers`     | ✅     |
-| `ms-routes`      | ✅     |
-| `ms-maintenance` | ✅     |
-| `ms-fuel`        | ✅     |
-| `ms-alerts`      | ✅     |
-| `ms-dashboard`   | ✅     |
-
-> Leyenda: ⏳ Pendiente, 🔧 Parcial, ✅ Completo
 
 ---
 
@@ -230,7 +212,7 @@ Los endpoints "interno" también aceptan `X-Internal-Key`.
 | GET    | `/api/vehicles/{vehicleId}`        | MANAGER, ADMIN | Detalle                                           |
 | POST   | `/api/vehicles`                    | MANAGER, ADMIN | Alta (nace `AVAILABLE`)                           |
 | PUT    | `/api/vehicles/{vehicleId}`        | MANAGER, ADMIN | Actualiza datos descriptivos                      |
-| PATCH  | `/api/vehicles/{vehicleId}/status` | MANAGER, ADMIN | Cambia estado y odómetro (transiciones validadas) |
+| PATCH  | `/api/vehicles/{vehicleId}/status` | MANAGER, ADMIN | Cambia estado y odómetro (transiciones validadas). Reactivar un vehículo `OUT_OF_SERVICE` requiere `ADMIN` |
 
 ### Conductores `🔒` — `ms-drivers`
 
