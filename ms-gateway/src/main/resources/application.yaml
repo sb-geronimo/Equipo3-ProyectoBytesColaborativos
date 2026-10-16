@@ -73,8 +73,7 @@ management:
         include: health
   endpoint:
     health:
-      show-details: always
-      show-components: ALWAYS
+      show-details: never
       probes:
         enabled: true
       groups:

@@ -4,6 +4,7 @@ import es.bytescolab.msalerts.dto.response.EvaluationSummaryResponse;
 import es.bytescolab.msalerts.entity.AlertEntity;
 import es.bytescolab.msalerts.entity.AlertRuleEntity;
 import es.bytescolab.msalerts.enums.AlertSeverity;
+import es.bytescolab.msalerts.enums.AlertType;
 import es.bytescolab.msalerts.repository.AlertRuleRepository;
 import es.bytescolab.msalerts.service.AlertEvaluationService;
 import es.bytescolab.msalerts.service.helper.AlertEvaluatorRegistry;
@@ -21,7 +22,9 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -55,6 +58,7 @@ public class AlertEvaluationServiceImpl implements AlertEvaluationService {
 
         List<AlertRuleEntity> rules = alertRuleRepository.findAll();
         List<String> skipped = new ArrayList<>();
+        Set<AlertType> evaluatedTypes = new HashSet<>();
         List<es.bytescolab.msalerts.service.helper.AlertCandidate> allCandidates = new ArrayList<>();
 
         for (AlertRuleEntity rule : rules) {
@@ -65,13 +69,17 @@ public class AlertEvaluationServiceImpl implements AlertEvaluationService {
             allCandidates.addAll(outcome.candidates());
             if (outcome.skipped()) {
                 skipped.add(rule.getType().name());
+            } else {
+                evaluatedTypes.add(rule.getType());
             }
         }
 
         AlertPersistenceHelper.PersistenceResult persistence =
-                persistenceHelper.apply(allCandidates);
+                persistenceHelper.apply(allCandidates, evaluatedTypes);
 
-        notifyCriticalAlerts(persistence.createdAlerts());
+        List<AlertEntity> toNotify = new ArrayList<>(persistence.createdAlerts());
+        toNotify.addAll(persistence.reopenedAlerts());
+        notifyCriticalAlerts(toNotify);
 
         long durationMs = Duration.between(startedAt, Instant.now(clock)).toMillis();
         log.info("Evaluación completada: created={}, resolved={}, skipped={}, durationMs={}",

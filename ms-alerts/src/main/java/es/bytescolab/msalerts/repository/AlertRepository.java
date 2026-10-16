@@ -29,6 +29,18 @@ public interface AlertRepository extends JpaRepository<AlertEntity, UUID>, JpaSp
         return this.findAll(specification.and((root, query, cb) -> root.get("dedupKey").in(dedupKeys)));
     }
 
+    default List<AlertEntity> findByDedupKeys(Collection<String> dedupKeys) {
+        if (dedupKeys == null || dedupKeys.isEmpty()) {
+            return List.of();
+        }
+        return this.findAll((root, query, cb) -> root.get("dedupKey").in(dedupKeys));
+    }
+
+    default List<AlertEntity> findActive() {
+        return this.findAll(AlertSpecifications.statusIn(
+                List.of(AlertStatus.OPEN, AlertStatus.ACKNOWLEDGED)));
+    }
+
     default List<AlertEntity> findCreatedInRange(Instant from, Instant to) {
         return this.findAll(AlertSpecifications.createdInRange(from, to));
     }

@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -39,6 +40,7 @@ import java.util.UUID;
 
 @Tag(name = "Conductores",
         description = "Gestión de conductores, licencias y fechas de caducidad")
+@SecurityRequirement(name = "bearerAuth")
 @Slf4j
 @Validated
 @RestController
