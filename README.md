@@ -370,7 +370,16 @@ GET http://localhost:8080/health
 ```
 
 Consulta el `/actuator/health` de cada servicio con un timeout de 2 segundos y marca como `DOWN` los que no responden.
-Siempre devuelve `200`. Cada microservicio expone también su propio `/actuator/health`.
+Siempre devuelve `200`. Cada microservicio expone también su propio `/actuator/health`, que devuelve únicamente el
+estado global, sin detalle de componentes (`db`, `diskSpace`, circuit breakers, etc.), e incluye la lista de grupos
+de probes (`liveness`, `readiness`):
+
+```json
+{
+  "groups": ["liveness", "readiness"],
+  "status": "UP"
+}
+```
 
 ---
 
