@@ -40,7 +40,7 @@ public class AlertEvaluatorRegistry {
         AlertEvaluator evaluator = mapping().get(rule.getType());
         if (evaluator == null) {
             log.warn("No hay evaluador registrado para la regla {}", rule.getType());
-            return new EvaluationOutcome(List.of(), false);
+            return new EvaluationOutcome(List.of(), true);
         }
         try {
             List<AlertCandidate> candidates = evaluator.evaluate(rule);
@@ -57,7 +57,6 @@ public class AlertEvaluatorRegistry {
     public record EvaluationOutcome(List<AlertCandidate> candidates, boolean skipped) {
         public EvaluationOutcome {
             candidates = candidates == null ? List.of() : List.copyOf(candidates);
-            skipped = skipped || candidates.isEmpty();
         }
 
         public static EvaluationOutcome empty() {

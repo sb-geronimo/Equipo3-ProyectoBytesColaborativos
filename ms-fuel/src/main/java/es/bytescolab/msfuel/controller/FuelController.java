@@ -10,6 +10,7 @@ import es.bytescolab.msfuel.dto.response.FuelStatsResponse;
 import es.bytescolab.msfuel.dto.response.PageResponse;
 import es.bytescolab.msfuel.dto.response.RefuelResponse;
 import es.bytescolab.msfuel.service.FuelRecordService;
+import es.bytescolab.msfuel.service.helper.RefuelCsvExporter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,7 +25,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +38,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Fuel", description = "Repostajes y consumo de combustible")
@@ -123,6 +128,44 @@ public class FuelController {
         Page<RefuelResponse> pageResult = fuelRecordService.findAll(
                 filter.vehicle(), filter.from(), filter.to(), safePage, safeSize);
         return ResponseEntity.ok(PageResponse.of(pageResult));
+    }
+
+    @Operation(
+            summary = "Exportar repostajes a CSV",
+            description = "Acepta los mismos filtros que el listado y devuelve un CSV en UTF-8 con cabecera, "
+                    + "con un máximo de 10.000 filas."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "CSV generado",
+                    content = @Content(mediaType = "text/csv")),
+            @ApiResponse(responseCode = "400",
+                    description = "Parámetros de filtrado inválidos (VALIDATION_ERROR)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping(value = "/refuels/export", produces = "text/csv")
+    public ResponseEntity<byte[]> exportRefuels(
+            @Parameter(description = "Filtra por identificador de vehículo",
+                    example = "6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01")
+            @RequestParam(value = "vehicle", required = false) UUID vehicle,
+
+            @Parameter(description = "Fecha inicial (inclusiva) sobre refueledAt",
+                    example = "2026-09-01")
+            @RequestParam(value = "from", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+
+            @Parameter(description = "Fecha final (inclusiva) sobre refueledAt",
+                    example = "2026-09-30")
+            @RequestParam(value = "to", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+    ) {
+        log.info("Petición GET /api/fuel/refuels/export recibida — vehicle={}, from={}, to={}",
+                vehicle, from, to);
+        List<RefuelResponse> refuels = fuelRecordService.findForExport(vehicle, from, to);
+        byte[] csv = RefuelCsvExporter.exportToCsv(refuels).getBytes(StandardCharsets.UTF_8);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"refuels-export.csv\"")
+                .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
+                .body(csv);
     }
 
     @Operation(

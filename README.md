@@ -86,11 +86,11 @@ ms-auth, ms-vehicles, ms-drivers ──► (ninguna)
 | `ms-gateway`     | ✅     |
 | `ms-auth`        | ✅     |
 | `ms-vehicles`    | 🔧     |
-| `ms-drivers`     | 🔧     |
-| `ms-routes`      | ⏳     |
-| `ms-maintenance` | 🔧     |
-| `ms-fuel`        | ⏳     |
-| `ms-alerts`      | ⏳     |
+| `ms-drivers`     | ✅     |
+| `ms-routes`      | ✅     |
+| `ms-maintenance` | ✅     |
+| `ms-fuel`        | ✅     |
+| `ms-alerts`      | ✅     |
 | `ms-dashboard`   | ⏳     |
 
 > Leyenda: ⏳ Pendiente, 🔧 Parcial, ✅ Completo
@@ -143,10 +143,7 @@ cp .env.example .env
 | `DEMO_SEED`                     | Semilla del generador de datos                                                                                       | `42`                                   |
 | `DEMO_DAYS`                     | Días de histórico a generar                                                                                          | `90`                                   |
 | `RATE_LIMIT_PER_MINUTE`         | Peticiones por minuto y por IP en el gateway                                                                         | `60`                                   |
-| `REDIS_HOST` / `REDIS_PORT`     | Host y puerto de Redis para el rate limiting (definidos en el `docker-compose.yml`)                                  | `redis` / `6379`                       |
-| `ALERTS_EVALUATION_INTERVAL_MS` | Intervalo del evaluador de alertas                                                                                   | `900000` (15 min)                      |
-| `*_SERVICE_URL`                 | URL de cada servicio (`AUTH_`, `VEHICLES_`, `DRIVERS_`, `ROUTES_`, `MAINTENANCE_`, `FUEL_`, `ALERTS_`, `DASHBOARD_`) | `http://ms-vehicles:8082`              |
-| `SPRING_DATASOURCE_URL`         | URL JDBC de cada servicio (definida en el `docker-compose.yml`)                                                      | `jdbc:postgresql://postgres:5432/<db>` |
+| `WEBHOOK_URL`                   | URL del webhook al que ms-alerts envía cada alerta CRITICAL nueva (vacía = deshabilitado)                             | — (vacía)                              |
 
 > **Generar `JWT_SECRET`:** `openssl rand -base64 32` (puede ejecutarse desde Git Bash).
 
@@ -253,6 +250,7 @@ Los endpoints "interno" también aceptan `X-Internal-Key`.
 | POST   | `/api/routes/{routeId}/start`    | Inicia la ruta, el vehículo pasa a `IN_USE`                  |
 | POST   | `/api/routes/{routeId}/complete` | Finaliza la ruta, actualiza el odómetro                      |
 | GET    | `/api/routes/stats`              | Serie temporal de rutas completadas                          |
+| GET    | `/api/routes/export`             | Exporta rutas a CSV (mismos filtros; máx. 10.000 filas)      |
 
 ### Mantenimiento `🔒` — `ms-maintenance`
 
@@ -263,18 +261,19 @@ Los endpoints "interno" también aceptan `X-Internal-Key`.
 | GET    | `/api/maintenance/orders`                    | Lista paginada, orden `scheduledFor` ASC (`vehicle`, `status`, `type`, `dueBefore`, `page`, `size`)     |
 | POST   | `/api/maintenance/orders/{orderId}/start`    | Inicia la orden `PENDING→IN_PROGRESS`, vehículo a `IN_MAINTENANCE`                                      |
 | POST   | `/api/maintenance/orders/{orderId}/complete` | Completa `IN_PROGRESS→COMPLETED`, vehículo a `AVAILABLE` con odómetro, recalcula `nextDueAt/nextDueKm`. |
-| GET    | `/api/maintenance/stats`                     | Serie temporal de órdenes y costes (pendiente US-17)                                                    |
+| GET    | `/api/maintenance/stats`                     | Serie temporal de órdenes y costes                                                                       |
 
 > Tarea diaria `06:00 UTC`: crea `PENDING` si faltan ≤7 días o ≤500 km para el vencimiento, sin duplicar abiertas.
 
 ### Combustible `🔒` — `ms-fuel`
 
-| Método | Ruta                    | Descripción                                 |
-|--------|-------------------------|---------------------------------------------|
-| POST   | `/api/fuel/refuels`     | Registra un repostaje y calcula el consumo  |
-| GET    | `/api/fuel/refuels`     | Lista paginada (`vehicle`, `from`, `to`)    |
-| GET    | `/api/fuel/consumption` | Consumo agregado por vehículo en un periodo |
-| GET    | `/api/fuel/stats`       | Serie temporal de litros, coste y consumo   |
+| Método | Ruta                       | Descripción                                                  |
+|--------|----------------------------|--------------------------------------------------------------|
+| POST   | `/api/fuel/refuels`        | Registra un repostaje y calcula el consumo                   |
+| GET    | `/api/fuel/refuels`        | Lista paginada (`vehicle`, `from`, `to`)                     |
+| GET    | `/api/fuel/refuels/export` | Exporta repostajes a CSV (mismos filtros; máx. 10.000 filas) |
+| GET    | `/api/fuel/consumption`    | Consumo agregado por vehículo en un periodo                  |
+| GET    | `/api/fuel/stats`          | Serie temporal de litros, coste y consumo                    |
 
 ### Alertas `🔒` — `ms-alerts`
 
@@ -286,6 +285,8 @@ Los endpoints "interno" también aceptan `X-Internal-Key`.
 | PUT    | `/api/alerts/rules/{type}`          | ADMIN          | Modifica una regla                                       |
 | POST   | `/api/alerts/evaluate`              | ADMIN          | Lanza una evaluación inmediata                           |
 | GET    | `/api/alerts/stats`                 | MANAGER, ADMIN | Serie temporal de alertas creadas                        |
+
+> US-23: con `WEBHOOK_URL` configurada, cada alerta `CRITICAL` nueva se envía en un POST con el JSON de la alerta (3 reintentos sin bloquear el evaluador); vacía = deshabilitado.
 
 ### Dashboard `🔒` — `ms-dashboard`
 

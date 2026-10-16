@@ -20,6 +20,7 @@ import es.bytescolab.msroutes.enums.VehicleStatus;
 import es.bytescolab.msroutes.enums.VehicleType;
 import es.bytescolab.msroutes.exception.DriverNotEligibleException;
 import es.bytescolab.msroutes.exception.DriverNotFoundException;
+import es.bytescolab.msroutes.exception.InvalidExportRangeException;
 import es.bytescolab.msroutes.exception.InvalidRouteStateException;
 import es.bytescolab.msroutes.exception.RouteNotFoundException;
 import es.bytescolab.msroutes.exception.RouteOverlapException;
@@ -28,6 +29,7 @@ import es.bytescolab.msroutes.exception.VehicleNotAvailableException;
 import es.bytescolab.msroutes.exception.VehicleNotFoundException;
 import es.bytescolab.msroutes.mapper.RouteMapper;
 import es.bytescolab.msroutes.repository.RouteRepository;
+import es.bytescolab.msroutes.repository.RouteSpecifications;
 import es.bytescolab.msroutes.service.RouteService;
 import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
@@ -62,6 +64,7 @@ public class RouteServiceImpl implements RouteService {
 
     private static final String MS_VEHICLES = "ms-vehicles";
     private static final String MS_DRIVERS = "ms-drivers";
+    private static final int MAX_EXPORT_ROWS = 10000;
 
     private final RouteMapper mapper;
     private final DriverClient driverClient;
@@ -99,6 +102,32 @@ public class RouteServiceImpl implements RouteService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "plannedStart"));
         return repository.findByFilters(vehicle, driver, status, fromInstant, toInstant, pageable)
                 .map(mapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RouteResponse> findForExport(UUID vehicle, UUID driver, RouteStatus status,
+                                             LocalDate from, LocalDate to) {
+        ensureExportRangeValid(from, to);
+        Instant fromInstant = from == null ? null
+                : from.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant toInstant = to == null ? null
+                : to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+
+        Sort exportSort = Sort.by(Sort.Order.desc("plannedStart"), Sort.Order.asc("id"));
+        return repository.findAll(
+                        RouteSpecifications.withFilters(vehicle, driver, status, fromInstant, toInstant),
+                        exportSort)
+                .stream()
+                .limit(MAX_EXPORT_ROWS)
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    private void ensureExportRangeValid(LocalDate from, LocalDate to) {
+        if (from != null && to != null && from.isAfter(to)) {
+            throw new InvalidExportRangeException(from, to);
+        }
     }
 
     @Override

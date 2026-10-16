@@ -9,6 +9,7 @@ import es.bytescolab.msroutes.enums.RouteStatus;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public interface RouteService {
@@ -17,6 +18,9 @@ public interface RouteService {
 
     Page<RouteResponse> findAll(UUID vehicle, UUID driver, RouteStatus status,
                                 LocalDate from, LocalDate to, int page, int size);
+
+    List<RouteResponse> findForExport(UUID vehicle, UUID driver, RouteStatus status,
+                                      LocalDate from, LocalDate to);
 
     RouteResponse findById(UUID routeId);
 

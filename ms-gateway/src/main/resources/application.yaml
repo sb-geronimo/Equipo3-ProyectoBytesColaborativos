@@ -6,8 +6,8 @@ spring:
     name: ms-gateway
   data:
     redis:
-      host: ${REDIS_HOST:redis}
-      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
   cloud:
     gateway:
       server:
@@ -18,42 +18,42 @@ spring:
           routes:
             # Rutas hacia servicios protegidos - el JWT lo valida el servicio destino
             - id: ms-auth
-              uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+              uri: ${AUTH_SERVICE_URL}
               predicates:
                 - Path=/api/auth/**
 
             - id: ms-vehicles
-              uri: ${VEHICLES_SERVICE_URL:http://localhost:8082}
+              uri: ${VEHICLES_SERVICE_URL}
               predicates:
                 - Path=/api/vehicles/**
 
             - id: ms-drivers
-              uri: ${DRIVERS_SERVICE_URL:http://localhost:8083}
+              uri: ${DRIVERS_SERVICE_URL}
               predicates:
                 - Path=/api/drivers/**
 
             - id: ms-routes
-              uri: ${ROUTES_SERVICE_URL:http://localhost:8085}
+              uri: ${ROUTES_SERVICE_URL}
               predicates:
                 - Path=/api/routes/**
 
             - id: ms-maintenance
-              uri: ${MAINTENANCE_SERVICE_URL:http://localhost:8086}
+              uri: ${MAINTENANCE_SERVICE_URL}
               predicates:
                 - Path=/api/maintenance/**
 
             - id: ms-fuel
-              uri: ${FUEL_SERVICE_URL:http://localhost:8087}
+              uri: ${FUEL_SERVICE_URL}
               predicates:
                 - Path=/api/fuel/**
 
             - id: ms-alerts
-              uri: ${ALERTS_SERVICE_URL:http://localhost:8088}
+              uri: ${ALERTS_SERVICE_URL}
               predicates:
                 - Path=/api/alerts/**
 
             - id: ms-dashboard
-              uri: ${DASHBOARD_SERVICE_URL:http://localhost:8089}
+              uri: ${DASHBOARD_SERVICE_URL}
               predicates:
                 - Path=/api/dashboard/**
 
@@ -64,7 +64,7 @@ logging:
 
 gateway:
   rate-limit:
-    per-minute: ${RATE_LIMIT_PER_MINUTE:60}
+    per-minute: ${RATE_LIMIT_PER_MINUTE}
 
 management:
   endpoints:
@@ -85,18 +85,18 @@ management:
 
 services:
   auth:
-    url: ${AUTH_SERVICE_URL:http://localhost:8081}/actuator/health
+    url: ${AUTH_SERVICE_URL}/actuator/health
   vehicles:
-    url: ${VEHICLES_SERVICE_URL:http://localhost:8082}/actuator/health
+    url: ${VEHICLES_SERVICE_URL}/actuator/health
   drivers:
-    url: ${DRIVERS_SERVICE_URL:http://localhost:8083}/actuator/health
+    url: ${DRIVERS_SERVICE_URL}/actuator/health
   routes:
-    url: ${ROUTES_SERVICE_URL:http://localhost:8085}/actuator/health
+    url: ${ROUTES_SERVICE_URL}/actuator/health
   maintenance:
-    url: ${MAINTENANCE_SERVICE_URL:http://localhost:8086}/actuator/health
+    url: ${MAINTENANCE_SERVICE_URL}/actuator/health
   fuel:
-    url: ${FUEL_SERVICE_URL:http://localhost:8087}/actuator/health
+    url: ${FUEL_SERVICE_URL}/actuator/health
   alerts:
-    url: ${ALERTS_SERVICE_URL:http://localhost:8088}/actuator/health
+    url: ${ALERTS_SERVICE_URL}/actuator/health
   dashboard:
-    url: ${DASHBOARD_SERVICE_URL:http://localhost:8089}/actuator/health
+    url: ${DASHBOARD_SERVICE_URL}/actuator/health

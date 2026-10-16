@@ -1,18 +1,18 @@
 x-domain-env: &domain-env
   JWT_SECRET: ${JWT_SECRET}
-  JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+  JWT_EXPIRATION: ${JWT_EXPIRATION}
   INTERNAL_API_KEY: ${INTERNAL_API_KEY}
-  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-demo}
-  DEMO_SEED: ${DEMO_SEED:-42}
-  DEMO_DAYS: ${DEMO_DAYS:-90}
-  SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-fleet}
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+  DEMO_SEED: ${DEMO_SEED}
+  DEMO_DAYS: ${DEMO_DAYS}
+  SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
   SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
 
 services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-fleet}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./docker/postgres/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
@@ -20,7 +20,7 @@ services:
     ports:
       - "5433:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fleet}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -147,6 +147,8 @@ services:
       MAINTENANCE_SERVICE_URL: http://ms-maintenance:8086
       FUEL_SERVICE_URL: http://ms-fuel:8087
       ALERTS_EVALUATION_INTERVAL_MS: 900000
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      WEBHOOK_TIMEOUT_MS: "5000"
 
   ms-dashboard:
     build: ./ms-dashboard
@@ -194,7 +196,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET}
-      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE}
 
 volumes:
   pgdata:
