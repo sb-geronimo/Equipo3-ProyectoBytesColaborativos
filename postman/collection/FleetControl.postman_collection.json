@@ -49,8 +49,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "var ts = Date.now();",
-                  "pm.environment.set('registerUsername', 'manager_' + ts);",
-                  "pm.environment.set('registerEmail', 'manager_' + ts + '@fleetcontrol.test');",
+                  "pm.environment.set('registerUsername', 'mgr_' + ts);",
+                  "pm.environment.set('registerEmail', 'mgr_' + ts + '@fleetcontrol.test');",
                   "pm.environment.set('registerPassword', 'FleetPass123');"
                 ]
               }
@@ -95,9 +95,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if (!pm.environment.get('registerEmail')) {",
-                  "    pm.environment.set('registerEmail', 'manager_' + Date.now() + '@fleetcontrol.test');",
-                  "    pm.environment.set('registerPassword', 'FleetPass123');",
+                  "if (!pm.environment.get('registerEmail') || !pm.environment.get('registerPassword')) {",
+                  "    throw new Error('login requires registerUsername/registerEmail/registerPassword in env; run auth/register first');",
                   "}"
                 ]
               }
@@ -229,7 +228,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"{{driverFullName}}\",\n  \"email\": \"{{driverEmail}}\",\n  \"phone\": \"{{driverPhone}}\",\n  \"licenseNumber\": \"{{driverLicenseNumber}}\",\n  \"licenseCategory\": \"B\",\n  \"licenseExpiresAt\": \"{{driverLicenseExpiresAt}}\"\n}"
+              "raw": "{\n  \"fullName\": \"{{driverFullName}}\",\n  \"email\": \"{{driverEmail}}\",\n  \"phone\": \"{{driverPhone}}\",\n  \"licenseNumber\": \"{{driverLicenseNumber}}\",\n  \"licenseCategory\": \"C\",\n  \"licenseExpiresAt\": \"{{driverLicenseExpiresAt}}\"\n}"
             },
             "url": {
               "raw": "{{url-8080}}/api/drivers",
@@ -291,7 +290,7 @@
                 "exec": [
                   "var ts = Date.now();",
                   "var last4 = ('0000' + (ts % 10000)).slice(-4);",
-                  "var suffix = String.fromCharCode(65 + (ts % 26)) + String.fromCharCode(65 + ((ts / 7 | 0) % 26)) + String.fromCharCode(65 + ((ts / 13 | 0) % 26));",
+                  "var suffix = String.fromCharCode(65 + (ts % 26), 65 + (Math.floor(ts / 100) % 26), 65 + (Math.floor(ts / 10000) % 26));",
                   "pm.environment.set('vehiclePlate', last4 + '-' + suffix);",
                   "pm.environment.set('vehicleMake', 'Mercedes-Benz');",
                   "pm.environment.set('vehicleModel', 'Actros');",
@@ -704,10 +703,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url-8080}}/api/maintenance/orders?size=20",
+              "raw": "{{url-8080}}/api/maintenance/orders?status=PENDING&size=20",
               "host": ["{{url-8080}}"],
               "path": ["api", "maintenance", "orders"],
-              "query": [{"key": "size", "value": "20"}]
+              "query": [{"key": "status", "value": "PENDING"}, {"key": "size", "value": "20"}]
             }
           }
         },
@@ -725,9 +724,7 @@
                   "}",
                   "var orderId = pm.environment.get('orderId');",
                   "if (!orderId) {",
-                  "    if (typeof pm.execution !== 'undefined' && pm.execution.skipRequest) {",
-                  "        pm.execution.skipRequest();",
-                  "    }",
+                  "    throw new Error('orders/start: orderId missing — run maintenance/orders/list first (needs PENDING orders in DB; if none, truncate maintenance_orders and restart ms-maintenance to re-seed)');",
                   "}"
                 ]
               }
@@ -772,9 +769,7 @@
                   "}",
                   "var orderId = pm.environment.get('orderId');",
                   "if (!orderId) {",
-                  "    if (typeof pm.execution !== 'undefined' && pm.execution.skipRequest) {",
-                  "        pm.execution.skipRequest();",
-                  "    }",
+                  "    throw new Error('orders/complete: orderId missing — run maintenance/orders/list first (needs PENDING orders in DB; if none, truncate maintenance_orders and restart ms-maintenance to re-seed)');",
                   "}"
                 ]
               }
@@ -901,25 +896,6 @@
     }
   ],
   "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          "pm.environment.unset('token');",
-          "pm.environment.unset('userId');",
-          "pm.environment.unset('driverId');",
-          "pm.environment.unset('vehicleId');",
-          "pm.environment.unset('routeId');",
-          "pm.environment.unset('planId');",
-          "pm.environment.unset('orderId');",
-          "pm.environment.unset('refuelId');",
-          "pm.environment.unset('registerUsername');",
-          "pm.environment.unset('registerEmail');",
-          "pm.environment.unset('registerPassword');"
-        ]
-      }
-    },
     {
       "listen": "test",
       "script": {
