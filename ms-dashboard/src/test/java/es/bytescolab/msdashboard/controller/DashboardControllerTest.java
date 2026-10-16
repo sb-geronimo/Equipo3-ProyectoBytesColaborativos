@@ -1,8 +1,6 @@
 package es.bytescolab.msdashboard.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import es.bytescolab.msdashboard.config.SecurityConfig;
 import es.bytescolab.msdashboard.dto.response.DashboardAlertsBlock;
 import es.bytescolab.msdashboard.dto.response.DashboardFleetBlock;
 import es.bytescolab.msdashboard.dto.response.DashboardKpisBlock;
@@ -11,15 +9,24 @@ import es.bytescolab.msdashboard.dto.response.DashboardResponse;
 import es.bytescolab.msdashboard.dto.response.DashboardUpcomingMaintenanceItem;
 import es.bytescolab.msdashboard.dto.response.RankingResponse;
 import es.bytescolab.msdashboard.dto.response.TimeseriesResponse;
+import es.bytescolab.msdashboard.enums.RankingMetric;
 import es.bytescolab.msdashboard.exception.DashboardExceptionHandler;
+import es.bytescolab.msdashboard.security.JwtAuthFilter;
+import es.bytescolab.msdashboard.security.JwtUtil;
+import es.bytescolab.msdashboard.security.TokenAccessDeniedHandler;
+import es.bytescolab.msdashboard.security.TokenAuthenticationEntryPoint;
 import es.bytescolab.msdashboard.service.DashboardAggregator;
 import es.bytescolab.msdashboard.service.RankingService;
 import es.bytescolab.msdashboard.service.TimeseriesService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -27,38 +34,44 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(controllers = DashboardController.class,
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE,
+                classes = SecurityConfig.class))
+@AutoConfigureMockMvc(addFilters = false)
+@Import(DashboardExceptionHandler.class)
 class DashboardControllerTest {
 
+    @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
     private DashboardAggregator dashboardAggregator;
+
+    @MockitoBean
     private TimeseriesService timeseriesService;
+
+    @MockitoBean
     private RankingService rankingService;
 
-    @BeforeEach
-    void prepararMockMvc() {
-        dashboardAggregator = mock(DashboardAggregator.class);
-        timeseriesService = mock(TimeseriesService.class);
-        rankingService = mock(RankingService.class);
+    @MockitoBean
+    private JwtAuthFilter jwtAuthFilter;
 
-        DashboardController controller = new DashboardController(
-                dashboardAggregator, timeseriesService, rankingService);
+    @MockitoBean
+    private JwtUtil jwtUtil;
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
+    @MockitoBean
+    private TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint;
 
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
-                .setControllerAdvice(new DashboardExceptionHandler())
-                .setMessageConverters(converter)
-                .build();
-    }
+    @MockitoBean
+    private TokenAccessDeniedHandler tokenAccessDeniedHandler;
 
     @Test
     void getSummary_todoResponde_devuelve200ConPartialFalse() throws Exception {
@@ -95,8 +108,26 @@ class DashboardControllerTest {
     }
 
     @Test
+    void getSummary_daysFueraDeRango_devuelve400ConValidationError() throws Exception {
+        mockMvc.perform(get("/api/dashboard").param("days", "400"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.details[0].field").value("days"))
+                .andExpect(jsonPath("$.details[0].reason")
+                        .value("must be less than or equal to 365"));
+    }
+
+    @Test
+    void getSummary_daysCero_devuelve400ConValidationError() throws Exception {
+        mockMvc.perform(get("/api/dashboard").param("days", "0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.details[0].field").value("days"));
+    }
+
+    @Test
     void getTimeseries_parametrosValidos_devuelve200() throws Exception {
-        when(timeseriesService.getTimeseries(org.mockito.ArgumentMatchers.any()))
+        when(timeseriesService.getTimeseries(any()))
                 .thenReturn(new TimeseriesResponse(
                         LocalDate.of(2026, 9, 1),
                         LocalDate.of(2026, 10, 14),
@@ -119,12 +150,9 @@ class DashboardControllerTest {
 
     @Test
     void getRanking_parametrosValidos_devuelve200() throws Exception {
-        when(rankingService.getRanking(org.mockito.ArgumentMatchers.any(),
-                org.mockito.ArgumentMatchers.anyInt(),
-                org.mockito.ArgumentMatchers.anyInt(),
-                org.mockito.ArgumentMatchers.any()))
+        when(rankingService.getRanking(any(), anyInt(), anyInt(), any()))
                 .thenReturn(new RankingResponse(
-                        es.bytescolab.msdashboard.enums.RankingMetric.FUEL_COST,
+                        RankingMetric.FUEL_COST,
                         30, 5, null, "EUR", List.of()));
 
         mockMvc.perform(get("/api/dashboard/vehicles/ranking")
@@ -137,5 +165,27 @@ class DashboardControllerTest {
                 .andExpect(jsonPath("$.limit").value(5))
                 .andExpect(jsonPath("$.unit").value("EUR"))
                 .andExpect(jsonPath("$.ranking").isArray());
+    }
+
+    @Test
+    void getRanking_daysFueraDeRango_devuelve400ConValidationError() throws Exception {
+        mockMvc.perform(get("/api/dashboard/vehicles/ranking")
+                        .param("metric", "FUEL_COST")
+                        .param("days", "999")
+                        .param("limit", "5"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.details[0].field").value("days"));
+    }
+
+    @Test
+    void getRanking_limitFueraDeRango_devuelve400ConValidationError() throws Exception {
+        mockMvc.perform(get("/api/dashboard/vehicles/ranking")
+                        .param("metric", "FUEL_COST")
+                        .param("days", "30")
+                        .param("limit", "99"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.details[0].field").value("limit"));
     }
 }

@@ -1,9 +1,11 @@
 package es.bytescolab.msdashboard.exception;
 
 import es.bytescolab.msdashboard.dto.response.ErrorResponse;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,6 +27,27 @@ public class DashboardExceptionHandler {
         log.warn("Parámetro obligatorio ausente: {}", ex.getParameterName());
         return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
                 "La petición contiene parámetros obligatorios ausentes", detalles);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleParamValidation(ConstraintViolationException ex) {
+        List<ErrorResponse.Detail> detalles = ex.getConstraintViolations().stream()
+                .map(v -> new ErrorResponse.Detail(extraerNombreParametro(v.getPropertyPath().toString()),
+                        v.getMessage()))
+                .toList();
+        log.warn("Validación de parámetros fallida: {}", detalles);
+        return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
+                "La petición contiene parámetros no válidos", detalles);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleBodyValidation(MethodArgumentNotValidException ex) {
+        List<ErrorResponse.Detail> detalles = ex.getBindingResult().getFieldErrors().stream()
+                .map(fe -> new ErrorResponse.Detail(fe.getField(), fe.getDefaultMessage()))
+                .toList();
+        log.warn("Validación de body fallida: {}", detalles);
+        return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
+                "La petición contiene campos no válidos", detalles);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -74,5 +97,10 @@ public class DashboardExceptionHandler {
                         .timestamp(Instant.now())
                         .build()
         );
+    }
+
+    private String extraerNombreParametro(String propertyPath) {
+        int indice = propertyPath.lastIndexOf('.');
+        return indice >= 0 ? propertyPath.substring(indice + 1) : propertyPath;
     }
 }
