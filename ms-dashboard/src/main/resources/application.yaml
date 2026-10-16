@@ -1,6 +1,15 @@
 spring:
   application:
     name: ms-dashboard
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 2000
+            readTimeout: 5000
+      circuitbreaker:
+        enabled: true
 
 server:
   port: 8089
@@ -33,3 +42,38 @@ clients:
 dashboard:
   cache:
     ttl-seconds: ${DASHBOARD_CACHE_TTL_SECONDS:60}
+x-resilience-defaults: &cb-defaults
+  slidingWindowType: COUNT_BASED
+  slidingWindowSize: 10
+  minimumNumberOfCalls: 10
+  failureRateThreshold: 50
+  waitDurationInOpenState: 30s
+
+x-timelimiter-defaults: &tl-defaults
+  timeoutDuration: 15s
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      ms-vehicles:
+        <<: *cb-defaults
+      ms-routes:
+        <<: *cb-defaults
+      ms-fuel:
+        <<: *cb-defaults
+      ms-maintenance:
+        <<: *cb-defaults
+      ms-alerts:
+        <<: *cb-defaults
+  timelimiter:
+    instances:
+      ms-vehicles:
+        <<: *tl-defaults
+      ms-routes:
+        <<: *tl-defaults
+      ms-fuel:
+        <<: *tl-defaults
+      ms-maintenance:
+        <<: *tl-defaults
+      ms-alerts:
+        <<: *tl-defaults

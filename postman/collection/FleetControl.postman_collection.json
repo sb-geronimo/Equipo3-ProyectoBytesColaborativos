@@ -195,9 +195,9 @@
               }
             },
             "url": {
-              "raw": "{{gwUrl}}/api/auth/login",
+              "raw": "{{url-8080}}/api/auth/login",
               "host": [
-                "{{gwUrl}}"
+                "{{url-8080}}"
               ],
               "path": [
                 "api",
@@ -212,7 +212,140 @@
     },
     {
       "name": "drivers",
-      "item": []
+      "item": [
+        {
+          "name": "list-drivers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8080}}/api/drivers?status=ACTIVE&licenseExpiringInDays=365",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "drivers"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "size",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "licenseExpiringInDays",
+                  "value": "365"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-driver",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8080}}/api/drivers/3b2d8f10-7c4a-4e55-b1a0-5d9e2c7f1a01",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "3b2d8f10-7c4a-4e55-b1a0-5d9e2c7f1a01"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create-driver",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"fullName\": \"Sara Ibáñez\",\r\n  \"email\": \"sara.ibanez@fleetcontrol.com\",\r\n  \"phone\": \"+34 622 456 789\",\r\n  \"licenseNumber\": \"B-5120377\",\r\n  \"licenseCategory\": \"B\",\r\n  \"licenseExpiresAt\": \"2029-06-30\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/drivers",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "drivers"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update-driver",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"fullName\": \"Sara Ibáñez\",\r\n  \"email\": \"sara.ibanez@fleetcontrol.com\",\r\n  \"phone\": \"+34 622 456 789\",\r\n  \"licenseNumber\": \"B-5120377\",\r\n  \"licenseCategory\": \"B\",\r\n  \"licenseExpiresAt\": \"2029-06-30\",\r\n  \"status\": \"ACTIVE\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/drivers/3b2d8f10-7c4a-4e55-b1a0-5d9e2c7f1a01",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "3b2d8f10-7c4a-4e55-b1a0-5d9e2c7f1a01"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     },
     {
       "name": "fuel",
@@ -224,12 +357,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -242,9 +370,9 @@
               }
             },
             "url": {
-              "raw": "{{url-8087}}/api/fuel/refuels",
+              "raw": "{{url-8080}}/api/fuel/refuels",
               "host": [
-                "{{url-8087}}"
+                "{{url-8080}}"
               ],
               "path": [
                 "api",
@@ -262,18 +390,13 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
-              "raw": "{{url-8087}}/api/fuel/refuels?vehicle=6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01&from=2026-09-01&to=2026-09-30&page=0&size=20",
+              "raw": "{{url-8080}}/api/fuel/refuels?vehicle=6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01&from=2026-09-01&to=2026-09-30&page=0&size=20",
               "host": [
-                "{{url-8087}}"
+                "{{url-8080}}"
               ],
               "path": [
                 "api",
@@ -307,24 +430,44 @@
           "response": []
         },
         {
+          "name": "export-csv",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8087}}/api/fuel/refuels/export",
+              "host": [
+                "{{url-8087}}"
+              ],
+              "path": [
+                "api",
+                "fuel",
+                "refuels",
+                "export"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "consumption",
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
-              "raw": "{{url-8087}}/api/fuel/consumption?from=2026-09-01&to=2026-09-30",
+              "raw": "{{url-8080}}/api/fuel/consumption?from=2026-09-01&to=2026-09-30",
               "host": [
-                "{{url-8087}}"
+                "{{url-8080}}"
               ],
               "path": [
                 "api",
@@ -352,18 +495,13 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
-              "raw": "{{url-8087}}/api/fuel/stats?from=2026-09-01&to=2026-09-30&granularity=WEEK&vehicle=6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01",
+              "raw": "{{url-8080}}/api/fuel/stats?from=2026-09-01&to=2026-09-30&granularity=WEEK&vehicle=6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a01",
               "host": [
-                "{{url-8087}}"
+                "{{url-8080}}"
               ],
               "path": [
                 "api",
@@ -404,12 +542,12 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
+                "value": "Bearer {{token}}"
               },
               {
                 "key": "X-Internal-Key",
-                "value": "{{internal-key}}"
+                "value": "{{internal-key}}",
+                "disabled": true
               }
             ],
             "url": {
@@ -450,11 +588,6 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
               }
             ],
             "body": {
@@ -487,12 +620,12 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
+                "value": "Bearer {{token}}"
               },
               {
                 "key": "X-Internal-Key",
-                "value": "{{internal-key}}"
+                "value": "{{internal-key}}",
+                "disabled": true
               }
             ],
             "url": {
@@ -538,11 +671,6 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
               }
             ],
             "url": {
@@ -569,11 +697,6 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
               }
             ],
             "body": {
@@ -600,16 +723,506 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8080}}/api/maintenance/stats?from=2026-09-01&to=2026-09-30&granularity=DAY",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "maintenance",
+                "stats"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                },
+                {
+                  "key": "granularity",
+                  "value": "DAY"
+                },
+                {
+                  "key": "vehicle",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
     {
       "name": "alerts",
-      "item": []
+      "item": [
+        {
+          "name": "list-alerts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8080}}/api/alerts?status=OPEN&severity=CRITICAL",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "alerts"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "OPEN"
+                },
+                {
+                  "key": "severity",
+                  "value": "CRITICAL"
+                },
+                {
+                  "key": "type",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "vehicle",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "size",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "acknowledge-alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"comment\": \"Cita pedida con el taller para el jueves\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/alerts/7f3a9c10-7c4a-4e55-b1a0-5d9e2c7f1a01/acknowledge",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "7f3a9c10-7c4a-4e55-b1a0-5d9e2c7f1a01",
+                "acknowledge"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "list-rules",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8080}}/api/alerts/rules",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "rules"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update-rule",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"enabled\": true,\r\n  \"severity\": \"CRITICAL\",\r\n  \"params\": {\r\n    \"daysBefore\": 14\r\n  }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/alerts/rules/MAINTENANCE_DUE",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "rules",
+                "MAINTENANCE_DUE"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "alerts-evaluate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8088}}/api/alerts/evaluate",
+              "host": [
+                "{{url-8088}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "evaluate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "alerts-stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8080}}/api/alerts/stats?from=2026-09-01&to=2026-09-30&granularity=DAY",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "stats"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                },
+                {
+                  "key": "granularity",
+                  "value": "DAY"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     },
     {
       "name": "routes",
-      "item": []
+      "item": [
+        {
+          "name": "list-route",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8085}}/api/routes",
+              "host": [
+                "{{url-8085}}"
+              ],
+              "path": [
+                "api",
+                "routes"
+              ],
+              "query": [
+                {
+                  "key": "vehicle",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "driver",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "PLANNED",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-route",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8080}}/api/routes/5b9e2c10-7f4a-4d55-b1a0-3c8e6f7a9201",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "routes",
+                "5b9e2c10-7f4a-4d55-b1a0-3c8e6f7a9201"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create-route",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"vehicleId\": \"977e1daa-6fa9-4917-98ce-510f5b187978\",\r\n    \"driverId\": \"8d9fc9e9-d951-4675-915b-d31b7e609fe6\",\r\n    \"origin\": \"Madrid - Centro Logístico\",\r\n    \"destination\": \"Valencia - Puerto\",\r\n    \"plannedStart\": \"2026-10-06T07:00:00Z\",\r\n    \"estimatedDurationMin\": 240,\r\n    \"plannedDistanceKm\": 355.0\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8085}}/api/routes",
+              "host": [
+                "{{url-8085}}"
+              ],
+              "path": [
+                "api",
+                "routes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "start-route",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8080}}/api/routes/5b9e2c10-7f4a-4d55-b1a0-3c8e6f7a9201/start",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "routes",
+                "5b9e2c10-7f4a-4d55-b1a0-3c8e6f7a9201",
+                "start"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "complete-route",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"actualDistanceKm\": 362.4,\r\n  \"notes\": \"Entrega sin incidencias\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url-8080}}/api/routes/5b9e2c10-7f4a-4d55-b1a0-3c8e6f7a9201/complete",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "routes",
+                "5b9e2c10-7f4a-4d55-b1a0-3c8e6f7a9201",
+                "complete"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "export-csv",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8080}}/api/routes/export?status=COMPLETED",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "routes",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "COMPLETED"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "routes-stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{url-8080}}/api/routes/stats?from=2026-09-01&to=2026-09-30&granularity=DAY",
+              "host": [
+                "{{url-8080}}"
+              ],
+              "path": [
+                "api",
+                "routes",
+                "stats"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                },
+                {
+                  "key": "granularity",
+                  "value": "DAY"
+                },
+                {
+                  "key": "vehicle",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     },
     {
       "name": "dashboard",
@@ -755,12 +1368,12 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
+                "value": "Bearer {{token}}"
               },
               {
                 "key": "X-Internal-Key",
-                "value": "{{internal-key}}"
+                "value": "{{internal-key}}",
+                "disabled": true
               }
             ],
             "url": {
@@ -811,11 +1424,6 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
               }
             ],
             "body": {
@@ -877,11 +1485,6 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
               }
             ],
             "url": {
@@ -906,11 +1509,6 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
-              },
-              {
-                "key": "X-Internal-Key",
-                "value": "{{internal-key}}",
-                "disabled": true
               }
             ],
             "body": {
@@ -943,12 +1541,12 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "disabled": true
+                "value": "Bearer {{token}}"
               },
               {
                 "key": "X-Internal-Key",
-                "value": "{{internal-key}}"
+                "value": "{{internal-key}}",
+                "disabled": true
               }
             ],
             "body": {

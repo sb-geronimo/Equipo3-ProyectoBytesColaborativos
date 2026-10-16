@@ -2,9 +2,9 @@ spring:
   application:
     name: ms-vehicles
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/vehicles_db}
-    username: ${SPRING_DATASOURCE_USERNAME:admin}
-    password: ${SPRING_DATASOURCE_PASSWORD:admin123}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
 server:
@@ -29,5 +29,5 @@ internal:
   api-key: ${INTERNAL_API_KEY}
 
 demo:
-  seed: ${DEMO_SEED:42}
-  days: ${DEMO_DAYS:90}
+  seed: ${DEMO_SEED}
+  days: ${DEMO_DAYS}

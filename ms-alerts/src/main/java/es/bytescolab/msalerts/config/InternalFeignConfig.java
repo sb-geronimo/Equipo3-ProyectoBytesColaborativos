@@ -2,6 +2,9 @@ package es.bytescolab.msalerts.config;
 
 import feign.Client;
 import feign.RequestInterceptor;
+import feign.RetryableException;
+import feign.Retryer;
+import feign.Request.HttpMethod;
 import feign.okhttp.OkHttpClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,5 +21,39 @@ public class InternalFeignConfig {
     @Bean
     public Client feignClient() {
         return new OkHttpClient();
+    }
+
+    @Bean
+    public Retryer getOnlyRetryer() {
+        return new GetOnlyRetryer();
+    }
+
+    static final class GetOnlyRetryer implements Retryer {
+
+        private int remainingAttempts = 1;
+
+        @Override
+        public void continueOrPropagate(RetryableException retryableFailure) {
+            if (remainingAttempts <= 0
+                    || retryableFailure.request().httpMethod() != HttpMethod.GET) {
+                throw retryableFailure;
+            }
+            remainingAttempts--;
+            try {
+                long retryDelayMillis = 100L;
+                if (retryableFailure.retryAfter() != null) {
+                    retryDelayMillis = Math.max(0L, retryableFailure.retryAfter());
+                }
+                Thread.sleep(retryDelayMillis);
+            } catch (InterruptedException interruptedFailure) {
+                Thread.currentThread().interrupt();
+                throw retryableFailure;
+            }
+        }
+
+        @Override
+        public Retryer clone() {
+            return new GetOnlyRetryer();
+        }
     }
 }

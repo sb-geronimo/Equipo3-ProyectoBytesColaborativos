@@ -20,6 +20,7 @@ import es.bytescolab.msroutes.enums.VehicleStatus;
 import es.bytescolab.msroutes.enums.VehicleType;
 import es.bytescolab.msroutes.exception.DriverNotEligibleException;
 import es.bytescolab.msroutes.exception.DriverNotFoundException;
+import es.bytescolab.msroutes.exception.InvalidExportRangeException;
 import es.bytescolab.msroutes.exception.InvalidRouteStateException;
 import es.bytescolab.msroutes.exception.RouteNotFoundException;
 import es.bytescolab.msroutes.exception.RouteOverlapException;
@@ -28,8 +29,11 @@ import es.bytescolab.msroutes.exception.VehicleNotAvailableException;
 import es.bytescolab.msroutes.exception.VehicleNotFoundException;
 import es.bytescolab.msroutes.mapper.RouteMapper;
 import es.bytescolab.msroutes.repository.RouteRepository;
+import es.bytescolab.msroutes.repository.RouteSpecifications;
 import es.bytescolab.msroutes.service.RouteService;
 import feign.FeignException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -60,6 +64,7 @@ public class RouteServiceImpl implements RouteService {
 
     private static final String MS_VEHICLES = "ms-vehicles";
     private static final String MS_DRIVERS = "ms-drivers";
+    private static final int MAX_EXPORT_ROWS = 10000;
 
     private final RouteMapper mapper;
     private final DriverClient driverClient;
@@ -101,6 +106,32 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<RouteResponse> findForExport(UUID vehicle, UUID driver, RouteStatus status,
+                                             LocalDate from, LocalDate to) {
+        ensureExportRangeValid(from, to);
+        Instant fromInstant = from == null ? null
+                : from.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant toInstant = to == null ? null
+                : to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+
+        Sort exportSort = Sort.by(Sort.Order.desc("plannedStart"), Sort.Order.asc("id"));
+        return repository.findAll(
+                        RouteSpecifications.withFilters(vehicle, driver, status, fromInstant, toInstant),
+                        exportSort)
+                .stream()
+                .limit(MAX_EXPORT_ROWS)
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    private void ensureExportRangeValid(LocalDate from, LocalDate to) {
+        if (from != null && to != null && from.isAfter(to)) {
+            throw new InvalidExportRangeException(from, to);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public RouteResponse findById(UUID routeId) {
         return mapper.toResponse(loadRoute(routeId));
     }
@@ -124,7 +155,7 @@ public class RouteServiceImpl implements RouteService {
             log.info("Actualizando estado del vehículo {} a IN_USE", vehicle.id());
             vehicleClient.updateStatus(vehicle.id(),
                     new VehicleStatusUpdateRequest(VehicleStatus.IN_USE, null));
-        } catch (FeignException ex) {
+        } catch (FeignException | CallNotPermittedException | NoFallbackAvailableException ex) {
             log.info("Fallo al cambiar el estado del vehículo a IN_USE: {}", ex.getMessage());
             throw new RouteServiceUnavailableException(MS_VEHICLES,
                     "ms-vehicles no pudo cambiar el estado del vehículo a IN_USE");
@@ -166,7 +197,7 @@ public class RouteServiceImpl implements RouteService {
         try {
             vehicleClient.updateStatus(route.getVehicleId(),
                     new VehicleStatusUpdateRequest(VehicleStatus.AVAILABLE, endOdometer));
-        } catch (FeignException ex) {
+        } catch (FeignException | CallNotPermittedException | NoFallbackAvailableException ex) {
             throw new RouteServiceUnavailableException(MS_VEHICLES,
                     "ms-vehicles no pudo devolver el vehículo a AVAILABLE");
         }
@@ -243,7 +274,7 @@ public class RouteServiceImpl implements RouteService {
             return vehicleClient.getVehicle(vehicleId);
         } catch (FeignException.NotFound ex) {
             throw new VehicleNotFoundException(vehicleId);
-        } catch (FeignException ex) {
+        } catch (FeignException | CallNotPermittedException | NoFallbackAvailableException ex) {
             throw new RouteServiceUnavailableException(MS_VEHICLES,
                     "ms-vehicles no está disponible");
         }
@@ -254,7 +285,7 @@ public class RouteServiceImpl implements RouteService {
             return driverClient.getDriver(driverId);
         } catch (FeignException.NotFound ex) {
             throw new DriverNotFoundException(driverId);
-        } catch (FeignException ex) {
+        } catch (FeignException | CallNotPermittedException | NoFallbackAvailableException ex) {
             throw new RouteServiceUnavailableException(MS_DRIVERS,
                     "ms-drivers no está disponible");
         }

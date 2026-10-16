@@ -10,6 +10,7 @@ import es.bytescolab.msroutes.dto.response.RouteResponse;
 import es.bytescolab.msroutes.dto.response.RouteStatsResponse;
 import es.bytescolab.msroutes.enums.RouteStatus;
 import es.bytescolab.msroutes.service.RouteService;
+import es.bytescolab.msroutes.service.helper.RouteCsvExporter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -38,6 +41,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Routes", description = "Planificación, ejecución e historial de rutas")
@@ -226,6 +231,52 @@ public class RouteController {
                 routeId, request.actualDistanceKm());
         RouteResponse response = routeService.complete(routeId, request);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Exportar rutas a CSV",
+            description = "Acepta los mismos filtros que el listado y devuelve un CSV en UTF-8 con cabecera, "
+                    + "con un máximo de 10.000 filas."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "CSV generado",
+                    content = @Content(mediaType = "text/csv")),
+            @ApiResponse(responseCode = "400",
+                    description = "Parámetros de filtrado inválidos (VALIDATION_ERROR)",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping(value = "/export", produces = "text/csv")
+    public ResponseEntity<byte[]> exportRoutes(
+            @Parameter(description = "Filtra por identificador de vehículo",
+                    example = "6f1c0a52-3b7e-4d1f-9a21-8c4d5e6f7a61")
+            @RequestParam(value = "vehicle", required = false) UUID vehicle,
+
+            @Parameter(description = "Filtra por identificador de conductor",
+                    example = "3b2d8f10-7c4a-4e55-b1a0-5d9e2c7f1a01")
+            @RequestParam(value = "driver", required = false) UUID driver,
+
+            @Parameter(description = "Filtra por estado de la ruta",
+                    example = "COMPLETED", schema = @Schema(implementation = RouteStatus.class))
+            @RequestParam(value = "status", required = false) RouteStatus status,
+
+            @Parameter(description = "Fecha inicial (inclusiva) del filtro sobre plannedStart",
+                    example = "2026-10-01")
+            @RequestParam(value = "from", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+
+            @Parameter(description = "Fecha final (inclusiva) del filtro sobre plannedStart",
+                    example = "2026-10-31")
+            @RequestParam(value = "to", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+    ) {
+        log.info("Petición GET /api/routes/export recibida — vehicle={}, driver={}, status={}, from={}, to={}",
+                vehicle, driver, status, from, to);
+        List<RouteResponse> routes = routeService.findForExport(vehicle, driver, status, from, to);
+        byte[] csv = RouteCsvExporter.exportToCsv(routes).getBytes(StandardCharsets.UTF_8);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"routes-export.csv\"")
+                .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
+                .body(csv);
     }
 
     @Operation(

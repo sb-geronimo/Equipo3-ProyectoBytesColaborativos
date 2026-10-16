@@ -1,11 +1,14 @@
 package es.bytescolab.msalerts.service.impl;
 
 import es.bytescolab.msalerts.dto.response.EvaluationSummaryResponse;
+import es.bytescolab.msalerts.entity.AlertEntity;
 import es.bytescolab.msalerts.entity.AlertRuleEntity;
+import es.bytescolab.msalerts.enums.AlertSeverity;
 import es.bytescolab.msalerts.repository.AlertRuleRepository;
 import es.bytescolab.msalerts.service.AlertEvaluationService;
 import es.bytescolab.msalerts.service.helper.AlertEvaluatorRegistry;
 import es.bytescolab.msalerts.service.helper.AlertPersistenceHelper;
+import es.bytescolab.msalerts.service.helper.WebhookAlertNotifier;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,7 @@ public class AlertEvaluationServiceImpl implements AlertEvaluationService {
     private final AlertRuleRepository alertRuleRepository;
     private final AlertEvaluatorRegistry evaluatorRegistry;
     private final AlertPersistenceHelper persistenceHelper;
+    private final WebhookAlertNotifier webhookAlertNotifier;
     private final Clock clock;
 
     @PersistenceContext
@@ -67,6 +71,8 @@ public class AlertEvaluationServiceImpl implements AlertEvaluationService {
         AlertPersistenceHelper.PersistenceResult persistence =
                 persistenceHelper.apply(allCandidates);
 
+        notifyCriticalAlerts(persistence.createdAlerts());
+
         long durationMs = Duration.between(startedAt, Instant.now(clock)).toMillis();
         log.info("Evaluación completada: created={}, resolved={}, skipped={}, durationMs={}",
                 persistence.created(), persistence.resolved(), skipped, durationMs);
@@ -77,6 +83,20 @@ public class AlertEvaluationServiceImpl implements AlertEvaluationService {
                 skipped,
                 durationMs
         );
+    }
+
+    private void notifyCriticalAlerts(List<AlertEntity> createdAlerts) {
+        List<AlertEntity> critical = createdAlerts.stream()
+                .filter(alert -> alert.getSeverity() == AlertSeverity.CRITICAL)
+                .toList();
+        if (critical.isEmpty()) {
+            return;
+        }
+        try {
+            webhookAlertNotifier.notifyCritical(critical);
+        } catch (Exception ex) {
+            log.warn("Fallo al notificar alertas CRITICAL al webhook: {}", ex.getMessage());
+        }
     }
 
     private boolean acquireEvaluationLock() {
